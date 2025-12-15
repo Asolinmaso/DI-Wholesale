@@ -35,14 +35,14 @@ export function ContactUs() {
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-2">
                 <h2 className="text-3xl md:text-4xl lg:text-[48px] font-semibold leading-[36px] md:leading-[48px] lg:leading-[72px]">
-                  <span className="text-gray-600">Contact</span>{" "}
-                  <span className="text-[#1E1E1E] relative">
-                    Us
+                  <span className="relative">
+                    Contact
                     <span
                       className="absolute bottom-0 left-0 h-[5px] bg-[#7B00E0]"
                       style={{ width: '145px' }}
                     />
-                  </span>
+                  </span>{" "}
+                  <span className="text-[#7B00E0]">Us</span>
                 </h2>
               </div>
               <p className="text-base md:text-lg lg:text-[24px] leading-[27px] md:leading-[32px] lg:leading-[36px] text-black font-normal">

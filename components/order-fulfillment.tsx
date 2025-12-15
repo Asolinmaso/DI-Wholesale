@@ -74,56 +74,96 @@ export function OrderFulfillment() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
         <div className="mb-12 md:mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#1E1E1E] mb-6">
-            From Product Discovery to Order Fulfillment
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#1E1E1E] mb-6 max-w-2xl" style={{ lineHeight: '4rem' }}>
+            From <span className="text-[#7B00E0]">Product Discovery</span> to <span className="text-[#7B00E0]">Order Fulfillment</span>
           </h2>
         </div>
 
-        {/* Content Grid - Steps Left, Image Right */}
+        {/* Content Grid - Timeline Left, Image Right */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-          {/* Steps on Left */}
-          <div className="flex flex-col space-y-6 md:space-y-8">
-            {steps.map((step, index) => (
-              <div key={index} className="flex gap-4 md:gap-6">
-                {/* Icon Container */}
-                <div className="flex-shrink-0">
-                  <div
-                    className={`w-12 h-12 md:w-14 md:h-14 rounded-lg flex items-center justify-center ${
-                      step.isActive ? "bg-[#7B00E0]" : "bg-gray-100"
-                    }`}
-                  >
-                    {step.icon}
+          {/* Timeline on Left */}
+          <div className="relative">
+            {/* Vertical Timeline Line - single line that stops at last step icon center */}
+            {/* Mobile line */}
+            <div 
+              className="absolute w-0.5 bg-gray-300 md:hidden"
+              style={{
+                left: '1.5rem', // Center of w-12 icon (3rem / 2 = 1.5rem), minus half line width (0.125rem)
+                top: '1.5rem', // Start from center of first icon (half of w-12 = 1.5rem)
+                // Height: from first icon center to last icon center
+                // Mobile: space-y-8 = 2rem, w-12 = 3rem
+                // For 5 steps: 4 gaps × (2rem spacing + 3rem icon) = 20rem
+                height: `${(steps.length - 1) * 5}rem`, // 4 × 5rem = 20rem
+              }}
+            />
+            {/* Desktop line */}
+            <div 
+              className="absolute w-0.5 bg-gray-300 hidden md:block"
+              style={{
+                left: '1.75rem', // Center of md:w-14 icon (3.5rem / 2 = 1.75rem), minus half line width
+                top: '1.75rem', // Start from center of first icon (half of md:w-14 = 1.75rem)
+                // Height: from first icon center to last icon center  
+                // Desktop: space-y-12 = 3rem, md:w-14 = 3.5rem
+                // For 5 steps: 4 gaps × (3rem spacing + 3.5rem icon) = 26rem
+                height: `${(steps.length - 1) * 6.5}rem`, // 4 × 6.5rem = 26rem
+              }}
+            />
+            
+            <div className="flex flex-col space-y-8 md:space-y-12">
+              {steps.map((step, index) => (
+                <div key={index} className="relative flex gap-6">
+                  {/* Icon Container with Timeline Connection */}
+                  <div className="flex-shrink-0 relative z-10">
+                    {step.isActive ? (
+                      // Active step - Purple circle with white icon
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#7B00E0] flex items-center justify-center shadow-lg">
+                        {step.icon}
+                      </div>
+                    ) : (
+                      // Inactive step - White circle with grey icon
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shadow-sm">
+                        <div className="text-gray-400">
+                          {step.icon}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="flex-1 pt-1">
+                    {step.isActive ? (
+                      // Active step - Full content with title and description
+                      <div>
+                        <h3 className="text-xl md:text-2xl font-semibold text-[#1E1E1E] mb-3">
+                          {step.title}
+                        </h3>
+                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                          {step.description}
+                        </p>
+                      </div>
+                    ) : (
+                      // Inactive step - Just title
+                      <div>
+                        <h3 className="text-base md:text-lg font-medium text-gray-600">
+                          {step.title}
+                        </h3>
+                      </div>
+                    )}
                   </div>
                 </div>
-                
-                {/* Content */}
-                <div className="flex-1">
-                  <h3 className="text-lg md:text-xl font-semibold text-[#1E1E1E] mb-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-                    {step.description}
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           {/* Image on Right */}
           <div className="flex items-center">
             <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-lg overflow-hidden bg-gray-100">
-              {/* Placeholder for warehouse/fulfillment image - replace with actual image when available */}
-              {/* When you have the image, uncomment and update the path:
               <Image
-                src="/fulfillment-image.jpg"
+                src="/Order_fulltilment.png"
                 alt="Order fulfillment and warehouse"
                 fill
                 className="object-cover"
               />
-              */}
-              <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                <p className="text-gray-400 text-sm">Warehouse/Fulfillment Image</p>
-              </div>
             </div>
           </div>
         </div>

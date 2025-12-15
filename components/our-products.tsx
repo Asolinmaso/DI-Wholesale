@@ -64,9 +64,9 @@ export function OurProducts() {
           {products.map((product, index) => (
             <div
               key={index}
-              className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
+              className="bg-white rounded-xl overflow-hidden shadow-lg transition-shadow cursor-pointer group border border-gray-300 p-6"
             >
-              <div className="relative w-full h-[200px] md:h-[250px] bg-gray-100">
+              <div className="relative w-full h-[200px] md:h-[250px] bg-gray-100 rounded-lg overflow-hidden">
                 <Image
                   src={product.image}
                   alt={product.name}
@@ -75,14 +75,13 @@ export function OurProducts() {
                 />
               </div>
               <div className="p-4 md:p-5 relative">
-                <h3 className="text-sm md:text-base font-semibold text-gray-800 mb-2 pr-8">
+                <h3 className="text-sm md:text-base font-semibold text-gray-800 mb-2 pr-12">
                   {product.name}
                 </h3>
-                <div className="absolute bottom-4 right-4">
-                  <ArrowUpRight
-                    className="h-5 w-5 md:h-6 md:w-6 text-[#7B00E0] group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"
-                    strokeWidth={2}
-                  />
+                <div className="absolute bottom-4 right-4 flex items-center justify-center">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#7B00E0] flex items-center justify-center transition-transform group-hover:scale-110">
+                    <ArrowUpRight className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                  </div>
                 </div>
               </div>
             </div>

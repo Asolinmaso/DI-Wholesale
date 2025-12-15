@@ -343,60 +343,50 @@ export function Footer() {
             <div className="flex flex-wrap items-center gap-6">
               {/* Di Pharma Innovation */}
               <div 
-                className="bg-white rounded-xl flex items-center gap-1 p-3"
-                style={{
-                  borderRadius: '12px',
-                  padding: '12px',
-                  gap: '4px',
-                }}
+                className="bg-white rounded-xl flex items-center gap-1"
+               
               >
                 <Image
                   src="/partner_companies/Di_Pharma_innovation.png"
                   alt="Di Pharma Innovation"
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 object-contain"
+                  width={80}
+                  height={80}
+                  className="w-20 h-12 object-contain"
                 />
               
               </div>
 
               {/* Indo Continental 7 - Placeholder if image not available */}
               <div 
-                className="bg-white rounded-xl flex items-center gap-1 p-3"
-                style={{
-                  borderRadius: '12px',
-                  padding: '12px',
-                  gap: '4px',
-                }}
+                className="bg-white rounded-xl flex items-center gap-1"
+               
               >
                 <div 
-                  className="w-10 h-10 flex items-center justify-center"
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                  }}
+                  className=" flex items-center justify-center"
+                 
                 >
-                  {/* Placeholder for Indo Continental logo - you can replace with actual image */}
-                  <div className="w-full h-full bg-gray-300 rounded"></div>
+                 <Image
+                  src="/partner_companies/Indo.png"
+                  alt="Indo Continental 7"
+                  width={80}
+                  height={60}
+                  className="w-20 h-12 object-contain"
+                />
                 </div>
               
               </div>
 
               {/* Dr.Will */}
               <div 
-                className="bg-white rounded-xl flex items-center gap-3 p-3"
-                style={{
-                  borderRadius: '12px',
-                  padding: '12px',
-                  gap: '12px',
-                }}
+                className="bg-white rounded-xl flex items-center gap-3"
+
               >
                 <Image
                   src="/partner_companies/Dr.will.png"
                   alt="Dr. Will"
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 object-contain"
+                    width={80}
+                    height={80}
+                  className="w-20 h-12 object-contain"
                 />
                
               </div>

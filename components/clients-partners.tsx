@@ -4,12 +4,20 @@ import Image from "next/image"
 
 const partners = [
   {
-    name: "Di Pharma Innovation",
-    image: "/partner_companies/Di_Pharma_innovation.png",
+    name: "Client 1",
+    image: "/our_clients/Client-1.png",
   },
   {
-    name: "Dr. Will",
-    image: "/partner_companies/Dr.will.png",
+    name: "Client 2",
+    image: "/our_clients/Client-2.png",
+  },
+  {
+    name: "Client 3",
+    image: "/our_clients/Client-3.png",
+  },
+  {
+    name: "Client 4",
+    image: "/our_clients/Client-4.png",
   },
 ]
 
@@ -58,7 +66,7 @@ export function ClientsPartners() {
                 key={index}
                 className="flex-shrink-0 mx-4 md:mx-8 flex items-center justify-center w-[200px] h-[120px]"
               >
-                <div className="relative w-full h-full grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100">
+                <div className="relative w-full h-full transition-all duration-300">
                   <Image
                     src={partner.image}
                     alt={partner.name}
