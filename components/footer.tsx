@@ -12,13 +12,13 @@ export function Footer() {
         minHeight: "728px",
       }}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-6">
-          {/* Company Info */}
-          <div className="lg:col-span-1">
+      <div className="max-w-screen-2xl mx-auto  py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 md:gap-6 lg:gap-12">
+          {/* Company Info - Left Side */}
+          <div className="lg:col-span-4">
             <div className="flex items-center gap-2 mb-4">
               <Image
-                src="/logo.png"
+                src="/Logo2.png"
                 alt="DI Wholesale Logo"
                 width={150}
                 height={150}
@@ -31,8 +31,8 @@ export function Footer() {
               style={{
                 fontFamily: 'var(--font-poppins), sans-serif',
                 fontWeight: 400,
-                fontSize: '16px',
-                lineHeight: '24px',
+                fontSize: '14px',
+                lineHeight: '20px',
                 color: '#FFFFFF',
               }}
             >
@@ -40,15 +40,17 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Quick Links */}
-          <div className="flex flex-col gap-8">
+          {/* Right Side - Other Sections */}
+          <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6">
+            {/* Quick Links */}
+            <div className="flex flex-col gap-8">
             <h3 
               className="font-poppins font-medium text-white"
               style={{
                 fontFamily: 'var(--font-poppins), sans-serif',
                 fontWeight: 500,
-                fontSize: '24px',
-                lineHeight: '36px',
+                fontSize: '20px',
+                lineHeight: '30px',
                 color: '#FFFFFF',
               }}
             >
@@ -62,8 +64,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -77,8 +79,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -92,8 +94,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -107,8 +109,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -125,8 +127,8 @@ export function Footer() {
               style={{
                 fontFamily: 'var(--font-poppins), sans-serif',
                 fontWeight: 500,
-                fontSize: '24px',
-                lineHeight: '36px',
+                fontSize: '20px',
+                lineHeight: '30px',
                 color: '#FFFFFF',
               }}
             >
@@ -141,8 +143,8 @@ export function Footer() {
                     style={{
                       fontFamily: 'var(--font-poppins), sans-serif',
                       fontWeight: 400,
-                      fontSize: '16px',
-                      lineHeight: '24px',
+                      fontSize: '14px',
+                      lineHeight: '20px',
                       color: '#FFFFFF',
                     }}
                   >
@@ -160,8 +162,8 @@ export function Footer() {
               style={{
                 fontFamily: 'var(--font-poppins), sans-serif',
                 fontWeight: 500,
-                fontSize: '24px',
-                lineHeight: '36px',
+                fontSize: '20px',
+                lineHeight: '30px',
                 color: '#FFFFFF',
               }}
             >
@@ -175,8 +177,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -190,8 +192,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -205,8 +207,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -220,8 +222,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -235,8 +237,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -250,8 +252,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -268,8 +270,8 @@ export function Footer() {
               style={{
                 fontFamily: 'var(--font-poppins), sans-serif',
                 fontWeight: 500,
-                fontSize: '24px',
-                lineHeight: '36px',
+                fontSize: '20px',
+                lineHeight: '30px',
                 color: '#FFFFFF',
               }}
             >
@@ -283,8 +285,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -298,8 +300,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -313,8 +315,8 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '16px',
-                    lineHeight: '24px',
+                    fontSize: '14px',
+                    lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
                 >
@@ -322,6 +324,7 @@ export function Footer() {
                 </span>
               </li>
             </ul>
+          </div>
           </div>
         </div>
 
@@ -333,8 +336,8 @@ export function Footer() {
               style={{
                 fontFamily: 'var(--font-poppins), sans-serif',
                 fontWeight: 500,
-                fontSize: '24px',
-                lineHeight: '36px',
+                fontSize: '20px',
+                lineHeight: '30px',
                 color: '#FFFFFF',
               }}
             >
@@ -351,7 +354,7 @@ export function Footer() {
                   alt="Di Pharma Innovation"
                   width={80}
                   height={80}
-                  className="w-20 h-12 object-contain"
+                  className="w-24 h-12 object-contain"
                 />
               
               </div>
@@ -370,7 +373,7 @@ export function Footer() {
                   alt="Indo Continental 7"
                   width={80}
                   height={60}
-                  className="w-20 h-12 object-contain"
+                  className="w-24 h-12 object-contain"
                 />
                 </div>
               
@@ -386,7 +389,7 @@ export function Footer() {
                   alt="Dr. Will"
                     width={80}
                     height={80}
-                  className="w-20 h-12 object-contain"
+                  className="w-24 h-12 object-contain"
                 />
                
               </div>
@@ -397,14 +400,14 @@ export function Footer() {
 
       {/* Copyright */}
       <div className="border-t border-white py-4 mt-8">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-screen-2xl mx-auto">
           <p 
             className="text-center font-poppins text-white"
             style={{
               fontFamily: 'var(--font-poppins), sans-serif',
               fontWeight: 400,
-              fontSize: '16px',
-              lineHeight: '40px',
+              fontSize: '14px',
+              lineHeight: '24px',
               color: '#FFFFFF',
             }}
           >

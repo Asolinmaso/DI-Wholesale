@@ -32,8 +32,10 @@ export function ClientsPartners() {
         <div className="mb-12 md:mb-16 flex justify-center">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center">
             <span className="text-gray-600">Our</span>{" "}
-            <span className="text-[#1E1E1E] relative">
-              Clients & Partners
+            <span className="text-[#7B00E0] relative">
+              Clients
+              <span className="text-[#1E1E1E]"> & </span>
+              Partners
               <span
                 className="absolute bottom-0 left-0 h-[5px] bg-[#7B00E0]"
                 style={{ width: '100%' }}

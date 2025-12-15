@@ -15,7 +15,7 @@ export function BannerSection() {
 
   return (
     <section 
-      className="relative w-full h-[600px] md:h-[700px] overflow-visible"
+      className="relative w-full h-[700px] md:h-[850px] lg:h-[900px] overflow-visible"
       style={{
         background: "linear-gradient(270deg, rgba(255, 255, 255, 0.1) 15%, #7B00E0 81%), url(/Banner_Section.png)",
         backgroundSize: "cover",

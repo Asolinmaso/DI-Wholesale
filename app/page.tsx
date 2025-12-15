@@ -21,8 +21,8 @@ export default function Home() {
       <ClientsPartners />
       <OrderFulfillment />
       <BulkProductsBanner />
-      <FAQSection />
       <ContactUs />
+      <FAQSection />
       <Footer />
     </main>
   )

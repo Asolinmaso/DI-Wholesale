@@ -135,13 +135,15 @@ export function ContactUs() {
                 </div>
 
                 {/* Submit Button */}
-                <button
-                  type="submit"
-                  className="flex items-center justify-center px-[18px] py-3 h-12 bg-[#7B00E0] rounded-lg text-white text-base font-medium leading-6 hover:bg-[#6A00C7] transition-colors"
-                  style={{ fontFamily: 'Poppins, sans-serif' }}
-                >
-                  Submit
-                </button>
+                <div className="flex justify-center">
+                  <button
+                    type="submit"
+                    className="flex items-center justify-center px-8 py-3 h-12 bg-[#7B00E0] rounded-lg text-white text-base font-medium leading-6 hover:bg-[#6A00C7] transition-colors"
+                    style={{ fontFamily: 'Poppins, sans-serif', width: 'auto', minWidth: '120px' }}
+                  >
+                    Submit
+                  </button>
+                </div>
               </form>
             </div>
           </div>

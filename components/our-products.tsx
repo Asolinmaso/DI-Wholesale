@@ -45,16 +45,16 @@ export function OurProducts() {
         {/* Heading */}
         <div className="mb-8 md:mb-12 flex flex-col items-center text-center">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            <span className="text-gray-600">Our</span>{" "}
+            <span className="">Our</span>{" "}
             <span className="text-[#7B00E0] relative">
               Products
               <span
-                className="absolute bottom-0 left-0 h-[5px] bg-[#7B00E0]"
-                style={{ width: '100%' }}
+                className="absolute bottom-[-10px] left-0 h-[5px] bg-[#7B00E0]"
+                style={{ width: '60%' }}
               />
             </span>
           </h2>
-          <p className=" md:text-lg max-w-3xl leading-relaxed">
+          <p className=" md:text-lg max-w-3xl leading-relaxed mt-6">
             Explore our wide range of certified medical instruments, surgical equipment, and pharmaceutical products designed to meet hospital and clinical standards.
           </p>
         </div>

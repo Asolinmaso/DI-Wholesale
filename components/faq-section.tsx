@@ -59,13 +59,13 @@ export function FAQSection() {
               lineHeight: '70px',
             }}
           >
-            <span className="text-gray-600">Frequently asked </span>
+            <span className="">Frequently asked </span>
             <span className="text-[#7B00E0]">questions</span>
           </h2>
           <div 
             className="w-[200px]"
             style={{
-              border: '5px solid #7B00E0',
+              border: '3px solid #7B00E0',
             }}
           />
         </div>
