@@ -2,45 +2,61 @@
 
 import Image from "next/image"
 import { ArrowUpRight } from "lucide-react"
+import Link from "next/link"
+import { useEffect, useMemo, useState } from "react"
+import { listCategories, mediaUrl, type Category } from "@/lib/api"
 
-const products = [
-  {
-    name: "Surgical Instruments",
-    image: "/our_products/Surgical_Instruments.jpg",
-  },
-  {
-    name: "Scissors",
-    image: "/our_products/Scissors.jpg",
-  },
-  {
-    name: "Medicines",
-    image: "/our_products/Medicines.jpg",
-  },
-  {
-    name: "Probe Instruments",
-    image: "/our_products/Probe_Instruments.jpg",
-  },
-  {
-    name: "Vascular Instruments",
-    image: "/our_products/Vascular_Instruments.jpg",
-  },
-  {
-    name: "Urology Instruments",
-    image: "/our_products/Urology_Instruments.jpg",
-  },
-  {
-    name: "Intestinal Surgery Instruments",
-    image: "/our_products/Intestinal_Surgery_Instrumnets.jpg",
-  },
-  {
-    name: "Neuro & Spine Instruments",
-    image: "/our_products/Neuro_and_Spine_Instruments.jpg",
-  },
-]
+const fallbackCategories = [
+  { name: "Surgical Instruments", image: "/our_products/Surgical_Instruments.jpg" },
+  { name: "Scissors", image: "/our_products/Scissors.jpg" },
+  { name: "Medicines", image: "/our_products/Medicines.jpg" },
+  { name: "Probe Instruments", image: "/our_products/Probe_Instruments.jpg" },
+  { name: "Vascular Instruments", image: "/our_products/Vascular_Instruments.jpg" },
+  { name: "Urology Instruments", image: "/our_products/Urology_Instruments.jpg" },
+  { name: "Intestinal Surgery Instruments", image: "/our_products/Intestinal_Surgery_Instrumnets.jpg" },
+  { name: "Neuro & Spine Instruments", image: "/our_products/Neuro_and_Spine_Instruments.jpg" },
+] satisfies Array<{ name: string; image: string }>
 
 export function OurProducts() {
+  const [categories, setCategories] = useState<Category[] | null>(null)
+  const [error, setError] = useState<string>("")
+
+  useEffect(() => {
+    let mounted = true
+    listCategories()
+      .then((data) => {
+        if (!mounted) return
+        setCategories(data)
+      })
+      .catch((e) => {
+        if (!mounted) return
+        setError(e?.message || "Failed to load categories")
+        setCategories([])
+      })
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  const gridItems = useMemo(() => {
+    if (categories && categories.length > 0) {
+      return categories.map((c) => ({
+        key: c._id,
+        name: c.name,
+        image: mediaUrl(c.image) || "/our_products/Surgical_Instruments.jpg",
+        href: `/products/${c._id}`,
+      }))
+    }
+    return fallbackCategories.map((c) => ({
+      key: c.name,
+      name: c.name,
+      image: c.image,
+      href: "/products",
+    }))
+  }, [categories])
+
   return (
-    <section id="products" className="">
+    <section id="product" className="">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
         <div className="mb-8 md:mb-12 flex flex-col items-center text-center">
@@ -61,22 +77,18 @@ export function OurProducts() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {products.map((product, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl overflow-hidden shadow-lg transition-shadow cursor-pointer group border border-gray-300 p-6"
+          {gridItems.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className="bg-white rounded-xl overflow-hidden shadow-lg transition-shadow cursor-pointer group border border-gray-300 p-6 block"
             >
               <div className="relative w-full h-[200px] md:h-[250px] bg-gray-100 rounded-lg overflow-hidden">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                />
+                <Image src={item.image} alt={item.name} fill className="object-cover" />
               </div>
               <div className="p-4 md:p-5 relative">
                 <h3 className="text-sm md:text-base font-semibold text-gray-800 mb-2 pr-12">
-                  {product.name}
+                  {item.name}
                 </h3>
                 <div className="absolute bottom-4 right-4 flex items-center justify-center">
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#7B00E0] flex items-center justify-center transition-transform group-hover:scale-110">
@@ -84,9 +96,21 @@ export function OurProducts() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
+
+        {error ? (
+          <p className="text-sm text-red-600 mt-4 text-center">{error}</p>
+        ) : categories && categories.length === 0 ? (
+          <p className="text-sm text-gray-500 mt-4 text-center">
+            No categories yet. Add them from{" "}
+            <Link href="/admin" className="text-[#7B00E0] underline">
+              Admin
+            </Link>
+            .
+          </p>
+        ) : null}
       </div>
     </section>
   )

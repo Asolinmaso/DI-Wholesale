@@ -1,20 +1,28 @@
 "use client"
 
 import { useState } from "react"
+import { usePathname } from "next/navigation"
 import Image from "next/image"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 const navItems = [
-  { name: "Home", href: "#" },
+  { name: "Home", href: "/" },
   { name: "About", href: "#about" },
-  { name: "Product", href: "#product" },
+  { name: "Products", href: "/products" },
   { name: "Why Choose Us?", href: "#why-choose-us" },
   { name: "Contact Us", href: "#contact" },
 ]
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname()
+
+  function isActive(href: string) {
+    if (href === "/") return pathname === "/"
+    return pathname.startsWith(href)
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
@@ -22,26 +30,40 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Image
-              src="/logo.png"
-              alt="DI Wholesale Logo"
-              width={150}
-              height={70}
-              className="h-12 md:h-16 w-auto"
-              priority
-            />
+            <Link href="/">
+              <Image
+                src="/logo.png"
+                alt="DI Wholesale Logo"
+                width={150}
+                height={70}
+                className="h-12 md:h-16 w-auto"
+                priority
+              />
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
             {navItems.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className="text-[rgba(30,30,30,0.45)] hover:text-[#7B00E0] transition-colors font-medium text-sm lg:text-base"
-              >
-                {item.name}
-              </a>
+              item.href.startsWith("#") ? (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="text-[rgba(30,30,30,0.45)] hover:text-[#7B00E0] transition-colors font-medium text-sm lg:text-base"
+                >
+                  {item.name}
+                </a>
+              ) : (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`transition-colors font-medium text-sm lg:text-base ${
+                    isActive(item.href) ? "text-[#7B00E0]" : "text-[rgba(30,30,30,0.45)] hover:text-[#7B00E0]"
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              )
             ))}
           </div>
 
@@ -66,14 +88,27 @@ export function Navbar() {
           <div className="md:hidden pb-4 border-t border-gray-200 mt-2">
             <div className="flex flex-col space-y-3 pt-4">
               {navItems.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  className="text-[rgba(30,30,30,0.45)] hover:text-[#7B00E0] transition-colors font-medium py-2"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.name}
-                </a>
+                item.href.startsWith("#") ? (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="text-[rgba(30,30,30,0.45)] hover:text-[#7B00E0] transition-colors font-medium py-2"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.name}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`transition-colors font-medium py-2 ${
+                      isActive(item.href) ? "text-[#7B00E0]" : "text-[rgba(30,30,30,0.45)] hover:text-[#7B00E0]"
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                )
               ))}
             </div>
           </div>
