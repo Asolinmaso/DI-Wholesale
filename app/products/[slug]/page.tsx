@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect, use } from "react"
+import { useState, useEffect } from "react"
+import { useParams } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { Search, ArrowLeft, Bookmark, Filter, ShoppingCart, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
@@ -8,8 +9,9 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { listCategories, listProducts, mediaUrl, Category, Product } from "@/lib/api"
 
-export default function CategoryProductsPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params)
+export default function CategoryProductsPage() {
+  const params = useParams()
+  const slug = params.slug as string
   const [category, setCategory] = useState<Category | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [search, setSearch] = useState("")
