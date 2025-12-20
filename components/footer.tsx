@@ -12,26 +12,25 @@ export function Footer() {
         minHeight: "728px",
       }}
     >
-      <div className="max-w-screen-2xl mx-auto  py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 md:gap-6 lg:gap-12">
+      <div className="max-w-screen-2xl mx-auto py-8 sm:py-10 md:py-12 lg:py-16 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 sm:gap-8 md:gap-6 lg:gap-12">
           {/* Company Info - Left Side */}
           <div className="lg:col-span-4">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <Image
                 src="/Logo2.png"
                 alt="DI Wholesale Logo"
                 width={150}
                 height={150}
-                className=""
+                className="w-24 h-auto sm:w-32 md:w-40 lg:w-[150px]"
               />
             
             </div>
             <p 
-              className="font-poppins text-white leading-relaxed"
+              className="font-poppins text-white leading-relaxed text-xs sm:text-sm md:text-base"
               style={{
                 fontFamily: 'var(--font-poppins), sans-serif',
                 fontWeight: 400,
-                fontSize: '14px',
                 lineHeight: '20px',
                 color: '#FFFFFF',
               }}
@@ -41,30 +40,28 @@ export function Footer() {
           </div>
 
           {/* Right Side - Other Sections */}
-          <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6">
+          <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 md:gap-6">
             {/* Quick Links */}
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
             <h3 
-              className="font-poppins font-medium text-white"
+              className="font-poppins font-medium text-white text-base sm:text-lg md:text-xl"
               style={{
                 fontFamily: 'var(--font-poppins), sans-serif',
                 fontWeight: 500,
-                fontSize: '20px',
                 lineHeight: '30px',
                 color: '#FFFFFF',
               }}
             >
               Quick Links
             </h3>
-            <ul className="flex flex-col gap-4">
+            <ul className="flex flex-col gap-2 sm:gap-3 md:gap-4">
               <li>
                 <a 
                   href="#about" 
-                  className="font-poppins text-white hover:text-white/80 transition-colors"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -75,11 +72,10 @@ export function Footer() {
               <li>
                 <a 
                   href="#product" 
-                  className="font-poppins text-white hover:text-white/80 transition-colors"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -90,11 +86,10 @@ export function Footer() {
               <li>
                 <a 
                   href="#contact" 
-                  className="font-poppins text-white hover:text-white/80 transition-colors"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -105,11 +100,10 @@ export function Footer() {
               <li>
                 <a 
                   href="#faq" 
-                  className="font-poppins text-white hover:text-white/80 transition-colors"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -121,20 +115,19 @@ export function Footer() {
           </div>
 
           {/* Category */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
             <h3 
-              className="font-poppins font-medium text-white"
+              className="font-poppins font-medium text-white text-sm sm:text-base md:text-lg"
               style={{
                 fontFamily: 'var(--font-poppins), sans-serif',
                 fontWeight: 500,
-                fontSize: '20px',
                 lineHeight: '30px',
                 color: '#FFFFFF',
               }}
             >
               Category
             </h3>
-            <ul className="flex flex-col gap-4">
+            <ul className="flex flex-col gap-2 sm:gap-3 md:gap-4">
               {[1, 2, 3, 4, 5, 6, 7].map((num) => (
                 <li key={num}>
                   <a 
@@ -143,7 +136,7 @@ export function Footer() {
                     style={{
                       fontFamily: 'var(--font-poppins), sans-serif',
                       fontWeight: 400,
-                      fontSize: '14px',
+                      fontSize: '12px',
                       lineHeight: '20px',
                       color: '#FFFFFF',
                     }}
@@ -156,28 +149,26 @@ export function Footer() {
           </div>
 
           {/* Legal */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
             <h3 
-              className="font-poppins font-medium text-white"
+              className="font-poppins font-medium text-white text-sm sm:text-base md:text-lg"
               style={{
                 fontFamily: 'var(--font-poppins), sans-serif',
                 fontWeight: 500,
-                fontSize: '20px',
                 lineHeight: '30px',
                 color: '#FFFFFF',
               }}
             >
               Legal
             </h3>
-            <ul className="flex flex-col gap-4">
+            <ul className="flex flex-col gap-2 sm:gap-3 md:gap-4">
               <li>
                 <a 
                   href="#" 
-                  className="font-poppins text-white hover:text-white/80 transition-colors"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -188,11 +179,10 @@ export function Footer() {
               <li>
                 <a 
                   href="#" 
-                  className="font-poppins text-white hover:text-white/80 transition-colors"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -203,11 +193,10 @@ export function Footer() {
               <li>
                 <a 
                   href="#" 
-                  className="font-poppins text-white hover:text-white/80 transition-colors"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -218,11 +207,10 @@ export function Footer() {
               <li>
                 <a 
                   href="#" 
-                  className="font-poppins text-white hover:text-white/80 transition-colors"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -233,11 +221,10 @@ export function Footer() {
               <li>
                 <a 
                   href="#" 
-                  className="font-poppins text-white hover:text-white/80 transition-colors"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -248,11 +235,10 @@ export function Footer() {
               <li>
                 <a 
                   href="#" 
-                  className="font-poppins text-white hover:text-white/80 transition-colors"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -264,20 +250,19 @@ export function Footer() {
           </div>
 
           {/* Contact */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
             <h3 
-              className="font-poppins font-medium text-white"
+              className="font-poppins font-medium text-white text-sm sm:text-base md:text-lg"
               style={{
                 fontFamily: 'var(--font-poppins), sans-serif',
                 fontWeight: 500,
-                fontSize: '20px',
                 lineHeight: '30px',
                 color: '#FFFFFF',
               }}
             >
               Contact
             </h3>
-            <ul className="flex flex-col gap-4">
+            <ul className="flex flex-col gap-2 sm:gap-3 md:gap-4">
               <li className="flex items-center gap-2">
                 <Phone className="h-5 w-5 text-white" />
                 <span 
@@ -285,7 +270,7 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
+                    fontSize: '12px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -300,7 +285,7 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
+                    fontSize: '12px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -315,7 +300,7 @@ export function Footer() {
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '14px',
+                    fontSize: '12px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -332,11 +317,10 @@ export function Footer() {
         <div className="mt-12 md:mt-16">
           <div className="flex flex-col gap-6">
             <h3 
-              className="font-poppins font-medium text-white"
+              className="font-poppins font-medium text-white text-sm sm:text-base md:text-lg"
               style={{
                 fontFamily: 'var(--font-poppins), sans-serif',
                 fontWeight: 500,
-                fontSize: '20px',
                 lineHeight: '30px',
                 color: '#FFFFFF',
               }}

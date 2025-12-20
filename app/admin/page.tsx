@@ -4,6 +4,25 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Plus, Trash2, Package, FolderOpen, Pencil } from "lucide-react"
+
+// Custom Select Component with custom arrow
+function CustomSelect({ children, className = "", ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <div className="relative">
+      <select
+        className={`w-full border rounded-lg px-3 py-2 appearance-none pr-10 ${className}`}
+        {...props}
+      >
+        {children}
+      </select>
+      <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+        <svg width="20" height="12" viewBox="0 0 20 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0.825786 4.46821L8.03978 11.2358C8.29746 11.4781 8.60354 11.6703 8.94049 11.8014C9.27744 11.9325 9.63864 12 10.0034 12C10.3682 12 10.7294 11.9325 11.0664 11.8014C11.4033 11.6703 11.7094 11.4781 11.9671 11.2358L19.1811 4.46821C20.9358 2.82203 19.6824 0 17.2035 0H2.77551C0.296573 0 -0.92897 2.82203 0.825786 4.46821Z" fill="#8A8A8A"/>
+        </svg>
+      </div>
+    </div>
+  )
+}
 import {
   listCategories,
   createCategory,
@@ -35,7 +54,7 @@ export default function AdminPage() {
 
   // Category form
   const [catName, setCatName] = useState("")
-  const [catImage, setCatImage] = useState<File | null>(null)
+  const [catImages, setCatImages] = useState<FileList | null>(null)
   const [editingCatId, setEditingCatId] = useState<string | null>(null)
 
   // Sub-category (Product) form
@@ -53,9 +72,8 @@ export default function AdminPage() {
   const [variantDesc, setVariantDesc] = useState("")
   const [variantShape, setVariantShape] = useState("")
   const [variantMaterial, setVariantMaterial] = useState("")
-  const [variantPrice, setVariantPrice] = useState("")
-  const [variantStock, setVariantStock] = useState("")
-  const [variantSku, setVariantSku] = useState("")
+  const [variantComposition, setVariantComposition] = useState("")
+  const [variantPacking, setVariantPacking] = useState("")
   const [editingVariantId, setEditingVariantId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -113,11 +131,11 @@ export default function AdminPage() {
     try {
       const form = new FormData()
       form.append("name", catName)
-      if (catImage) form.append("image", catImage)
+      if (catImages) Array.from(catImages).forEach((f) => form.append("images", f))
       if (editingCatId) await updateCategory(editingCatId, form)
       else await createCategory(form)
       setCatName("")
-      setCatImage(null)
+      setCatImages(null)
       setEditingCatId(null)
       fetchCategories()
     } catch (err: unknown) {
@@ -140,7 +158,7 @@ export default function AdminPage() {
   function startEditCategory(cat: Category) {
     setEditingCatId(cat._id)
     setCatName(cat.name)
-    setCatImage(null)
+    setCatImages(null)
     setTab("categories")
   }
 
@@ -193,12 +211,14 @@ export default function AdminPage() {
     try {
       const form = new FormData()
       form.append("name", variantName)
-      form.append("sku", variantSku || "")
-      form.append("price", variantPrice || "0")
-      form.append("stockCount", variantStock || "0")
+      form.append("productSize", variantSize || "")
+      form.append("productShape", variantShape || "")
+      form.append("minimumQuantity", variantMinQty || "0")
+      form.append("material", variantMaterial || "")
+      form.append("description", variantDesc || "")
+      form.append("composition", variantComposition || "")
+      form.append("packing", variantPacking || "")
       if (variantImages) Array.from(variantImages).forEach((f) => form.append("images", f))
-      // Note: Additional fields (size, shape, material, minQty, desc) would need backend support
-      // For now, we store them as part of the name or skip them
 
       if (editingVariantId) await updateSubProduct(variantSubCatId, editingVariantId, form)
       else await createSubProduct(variantSubCatId, form)
@@ -212,9 +232,8 @@ export default function AdminPage() {
       setVariantDesc("")
       setVariantShape("")
       setVariantMaterial("")
-      setVariantPrice("")
-      setVariantStock("")
-      setVariantSku("")
+      setVariantComposition("")
+      setVariantPacking("")
       setEditingVariantId(null)
       if (variantSubCatId) fetchVariants(variantSubCatId)
     } catch (err: unknown) {
@@ -227,15 +246,14 @@ export default function AdminPage() {
   function startEditVariant(v: SubProduct) {
     setEditingVariantId(v._id)
     setVariantName(v.name)
-    setVariantSku(v.sku || "")
-    setVariantPrice(String(v.price || ""))
-    setVariantStock(String(v.stockCount || ""))
     setVariantImages(null)
-    setVariantSize("")
-    setVariantMinQty("")
-    setVariantDesc("")
-    setVariantShape("")
-    setVariantMaterial("")
+    setVariantSize(v.productSize || "")
+    setVariantMinQty(String(v.minimumQuantity || ""))
+    setVariantDesc(v.description || "")
+    setVariantShape(v.productShape || "")
+    setVariantMaterial(v.material || "")
+    setVariantComposition(v.composition || "")
+    setVariantPacking(v.packing || "")
     
     // Find the product to get categoryId
     const prod = subCategories.find((p) => p._id === v.productId)
@@ -322,13 +340,23 @@ export default function AdminPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Category Image :</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setCatImage(e.target.files?.[0] || null)}
-                      className="w-full border rounded-lg px-3 py-2"
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Category Images :</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => setCatImages(e.target.files)}
+                        className="hidden"
+                        id="cat-image-upload"
+                      />
+                      <label htmlFor="cat-image-upload" className="border rounded-lg px-4 py-2.5 cursor-pointer hover:bg-gray-50 flex items-center gap-2 text-[#7B00E0] font-medium">
+                        <span>↑ Upload Files</span>
+                      </label>
+                      <span className="text-gray-400 text-sm">
+                        {catImages && catImages.length > 0 ? `${catImages.length} file(s) chosen` : "No files Chosen"}
+                      </span>
+                    </div>
                   </div>
                   <div className="md:col-span-2">
                     <button
@@ -346,7 +374,7 @@ export default function AdminPage() {
                         onClick={() => {
                           setEditingCatId(null)
                           setCatName("")
-                          setCatImage(null)
+                          setCatImages(null)
                         }}
                       >
                         Cancel
@@ -360,15 +388,38 @@ export default function AdminPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {categories.map((cat) => (
                     <div key={cat._id} className="flex items-center gap-4 border rounded-xl shadow-sm p-4">
-                      {cat.image ? (
-                        <Image
-                          src={mediaUrl(cat.image)}
-                          alt={cat.name}
-                          width={140}
-                          height={100}
-                          className="w-[140px] h-[100px] object-cover rounded-lg"
-                          unoptimized
-                        />
+                      {(cat.images && cat.images.length > 0) || cat.image ? (
+                        <div className="flex gap-2">
+                          {cat.images && cat.images.length > 0 ? (
+                            <>
+                              {cat.images.slice(0, 2).map((image, index) => (
+                                <Image
+                                  key={index}
+                                  src={mediaUrl(image)}
+                                  alt={`${cat.name} ${index + 1}`}
+                                  width={140}
+                                  height={100}
+                                  className="w-[65px] h-[65px] object-cover rounded-lg"
+                                  unoptimized
+                                />
+                              ))}
+                              {cat.images.length > 2 && (
+                                <div className="w-[65px] h-[65px] rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+                                  +{cat.images.length - 2}
+                                </div>
+                              )}
+                            </>
+                          ) : cat.image ? (
+                            <Image
+                              src={mediaUrl(cat.image)}
+                              alt={cat.name}
+                              width={140}
+                              height={100}
+                              className="w-[140px] h-[100px] object-cover rounded-lg"
+                              unoptimized
+                            />
+                          ) : null}
+                        </div>
                       ) : (
                         <div className="w-[140px] h-[100px] rounded-lg bg-gray-100" />
                       )}
@@ -409,10 +460,9 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Select Category :</label>
-                    <select
+                    <CustomSelect
                       value={subCatCatId}
                       onChange={(e) => setSubCatCatId(e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2"
                       required
                     >
                       <option value="">Select Category</option>
@@ -421,7 +471,7 @@ export default function AdminPage() {
                           {c.name}
                         </option>
                       ))}
-                    </select>
+                    </CustomSelect>
                   </div>
                   <div className="md:col-span-2">
                     <button
@@ -452,10 +502,9 @@ export default function AdminPage() {
               <div className="p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <h3 className="text-xl font-semibold">Sub-Categories</h3>
-                  <select
+                  <CustomSelect
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="border rounded-lg px-3 py-2"
                   >
                     <option value="">All Categories</option>
                     {categories.map((c) => (
@@ -463,7 +512,7 @@ export default function AdminPage() {
                         {c.name}
                       </option>
                     ))}
-                  </select>
+                  </CustomSelect>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {subCategories.map((p) => (
@@ -500,28 +549,17 @@ export default function AdminPage() {
                       onChange={(e) => setVariantName(e.target.value)}
                       className="w-full border rounded-lg px-3 py-2"
                       required
-                      placeholder="Enter Sub-Category Name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">SKU :</label>
-                    <input
-                      type="text"
-                      value={variantSku}
-                      onChange={(e) => setVariantSku(e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2"
-                      placeholder="Optional"
+                      placeholder="Enter Product Name "
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Select Category :</label>
-                    <select
+                    <CustomSelect
                       value={variantCatId}
                       onChange={(e) => {
                         setVariantCatId(e.target.value)
                         setVariantSubCatId("")
                       }}
-                      className="w-full border rounded-lg px-3 py-2"
                       required
                     >
                       <option value="">Select Category</option>
@@ -530,20 +568,21 @@ export default function AdminPage() {
                           {c.name}
                         </option>
                       ))}
-                    </select>
+                    </CustomSelect>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Category Image :</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Image :</label>
                     <div className="flex items-center gap-3">
                       <input
                         type="file"
                         accept="image/*"
+                        multiple
                         onChange={(e) => setVariantImages(e.target.files)}
                         className="hidden"
                         id="variant-image-upload"
                       />
                       <label htmlFor="variant-image-upload" className="border rounded-lg px-4 py-2.5 cursor-pointer hover:bg-gray-50 flex items-center gap-2 text-[#7B00E0] font-medium">
-                        <span>↑ Upload File</span>
+                        <span>↑ Upload Files</span>
                       </label>
                       <span className="text-gray-400 text-sm">
                         {variantImages && variantImages.length > 0 ? `${variantImages.length} file(s) chosen` : "No file Chosen"}
@@ -552,10 +591,9 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Select Sub-Category :</label>
-                    <select
+                    <CustomSelect
                       value={variantSubCatId}
                       onChange={(e) => setVariantSubCatId(e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2"
                       required
                       disabled={!variantCatId}
                     >
@@ -567,7 +605,7 @@ export default function AdminPage() {
                             {p.name}
                           </option>
                         ))}
-                    </select>
+                    </CustomSelect>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Product Size :</label>
@@ -576,8 +614,9 @@ export default function AdminPage() {
                       value={variantSize}
                       onChange={(e) => setVariantSize(e.target.value)}
                       className="w-full border rounded-lg px-3 py-2"
-                      placeholder="Enter Available Sizes"
+                      placeholder="Enter Available Sizes (e.g., 5&quot;, 6&quot;, 7&quot;, 8&quot;)"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Separate multiple sizes with commas</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Product Shape :</label>
@@ -586,8 +625,9 @@ export default function AdminPage() {
                       value={variantShape}
                       onChange={(e) => setVariantShape(e.target.value)}
                       className="w-full border rounded-lg px-3 py-2"
-                      placeholder="Enter Available Shapes"
+                      placeholder="Enter Available Shapes (e.g., Straight, Curved, Teeth)"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Separate multiple shapes with commas</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Quantity :</label>
@@ -620,6 +660,35 @@ export default function AdminPage() {
                       placeholder="Enter Description"
                     />
                   </div>
+                  {/* Medicine-specific fields */}
+                  {(() => {
+                    const selectedCategory = categories.find(c => c._id === variantCatId)
+                    const isMedicine = selectedCategory?.name?.toLowerCase().includes("medicine") || selectedCategory?.slug?.toLowerCase().includes("medicine")
+                    return isMedicine ? (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Composition :</label>
+                          <input
+                            type="text"
+                            value={variantComposition}
+                            onChange={(e) => setVariantComposition(e.target.value)}
+                            className="w-full border rounded-lg px-3 py-2"
+                            placeholder="Enter Composition (e.g., Aceclofenac 100 mg)"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Packing :</label>
+                          <input
+                            type="text"
+                            value={variantPacking}
+                            onChange={(e) => setVariantPacking(e.target.value)}
+                            className="w-full border rounded-lg px-3 py-2"
+                            placeholder="Enter Packing (e.g., 10's, 100ml)"
+                          />
+                        </div>
+                      </>
+                    ) : null
+                  })()}
                   <div className="md:col-span-2">
                     <button
                       type="submit"
@@ -644,9 +713,8 @@ export default function AdminPage() {
                           setVariantDesc("")
                           setVariantShape("")
                           setVariantMaterial("")
-                          setVariantPrice("")
-                          setVariantStock("")
-                          setVariantSku("")
+                          setVariantComposition("")
+                          setVariantPacking("")
                         }}
                       >
                         Cancel
@@ -659,10 +727,9 @@ export default function AdminPage() {
               <div className="p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <h3 className="text-xl font-semibold">Products List</h3>
-                  <select
+                  <CustomSelect
                     value={selectedSubCategory}
                     onChange={(e) => setSelectedSubCategory(e.target.value)}
-                    className="border rounded-lg px-3 py-2"
                   >
                     <option value="">Select Sub-Category to view products</option>
                     {subCategories.map((p) => (
@@ -670,7 +737,7 @@ export default function AdminPage() {
                         {p.name}
                       </option>
                     ))}
-                  </select>
+                  </CustomSelect>
                 </div>
                 {!selectedSubCategory ? (
                   <div className="text-gray-500">Select a Sub-Category to view products.</div>
@@ -692,9 +759,6 @@ export default function AdminPage() {
                         )}
                         <div className="flex-1">
                           <p className="text-lg font-medium">{v.name}</p>
-                          <p className="text-sm text-gray-500">
-                            {v.sku ? `SKU: ${v.sku}` : ""}
-                          </p>
                         </div>
                         <button onClick={() => startEditVariant(v)} className="text-gray-600 hover:text-gray-900">
                           <Pencil size={18} />

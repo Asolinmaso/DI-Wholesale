@@ -49,49 +49,42 @@ export function FAQSection() {
     <section className="py-16 md:py-24 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
-        <div className="flex flex-col items-center gap-2 mb-12 md:mb-16">
+        <div className="flex flex-col items-center gap-2 mb-8 sm:mb-10 md:mb-12 lg:mb-16 px-4">
           <h2 
-            className="font-poppins text-center text-3xl md:text-4xl lg:text-[48px] leading-[36px] md:leading-[48px] lg:leading-[70px]"
+            className="font-poppins text-center text-2xl sm:text-3xl md:text-4xl lg:text-[48px] leading-[28px] sm:leading-[36px] md:leading-[48px] lg:leading-[70px]"
             style={{
               fontFamily: 'var(--font-poppins), sans-serif',
               fontWeight: 600,
-              fontSize: '48px',
-              lineHeight: '70px',
             }}
           >
             <span className="">Frequently asked </span>
             <span className="text-[#7B00E0]">questions</span>
           </h2>
           <div 
-            className="w-[200px]"
+            className="w-[120px] sm:w-[150px] md:w-[200px]"
             style={{
-              border: '3px solid #7B00E0',
+              border: '2px solid #7B00E0',
             }}
           />
         </div>
 
         {/* FAQ Items */}
-        <div className="max-w-[1063px] mx-auto flex flex-col gap-4">
+        <div className="max-w-[1063px] mx-auto flex flex-col gap-3 sm:gap-4 px-4">
           {faqData.map((faq, index) => {
             const isOpen = openIndex === index
             return (
               <div
                 key={index}
-                className="bg-[#EFDBFF] border border-[#908E8E] rounded-[20px] p-6"
-                style={{
-                  padding: '24px',
-                }}
+                className="bg-[#EFDBFF] border border-[#908E8E] rounded-[12px] sm:rounded-[16px] md:rounded-[20px] p-4 sm:p-5 md:p-6"
               >
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3 sm:gap-4">
                   {/* Question Row */}
-                  <div className="flex justify-between items-center gap-4">
+                  <div className="flex justify-between items-start sm:items-center gap-3 sm:gap-4">
                     <h3
-                      className="font-poppins text-lg md:text-xl lg:text-[28px] leading-[42px] text-[#1E1E1E] flex-1"
+                      className="font-poppins text-base sm:text-lg md:text-xl lg:text-[28px] leading-[24px] sm:leading-[28px] md:leading-[32px] lg:leading-[42px] text-[#1E1E1E] flex-1"
                       style={{
                         fontFamily: 'var(--font-poppins), sans-serif',
                         fontWeight: 400,
-                        fontSize: '28px',
-                        lineHeight: '42px',
                         color: '#1E1E1E',
                       }}
                     >
@@ -99,11 +92,7 @@ export function FAQSection() {
                     </h3>
                     <button
                       onClick={() => toggleFAQ(index)}
-                      className="flex-shrink-0 w-[63px] h-[63px] bg-[#7B00E0] rounded-full flex items-center justify-center"
-                      style={{
-                        borderRadius: '31.5px',
-                        padding: '22px 14px',
-                      }}
+                      className="flex-shrink-0 w-[50px] h-[50px] sm:w-[55px] sm:h-[55px] md:w-[63px] md:h-[63px] bg-[#7B00E0] rounded-full flex items-center justify-center"
                       aria-label={isOpen ? "Close answer" : "Open answer"}
                     >
                       {isOpen ? <ArrowUp /> : <ArrowDown />}
@@ -113,12 +102,11 @@ export function FAQSection() {
                   {/* Answer */}
                   {isOpen && faq.answer && (
                     <p
-                      className="font-poppins text-sm md:text-base text-[#1E1E1E] mt-2"
+                      className="font-poppins text-sm sm:text-base text-[#1E1E1E] mt-1 sm:mt-2"
                       style={{
                         fontFamily: 'var(--font-poppins), sans-serif',
                         fontWeight: 400,
-                        fontSize: '16px',
-                        lineHeight: '24px',
+                        lineHeight: '22px',
                         color: '#1E1E1E',
                       }}
                     >

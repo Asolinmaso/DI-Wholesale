@@ -20,8 +20,6 @@ export interface CartItem {
   quantity: number
   size?: string
   shape?: string
-  price: number
-  stockCount: number
 }
 
 const DB_NAME = "DI_WHOLESALE_DB"
@@ -185,9 +183,9 @@ export async function getCartItemCount(): Promise<number> {
 
 /**
  * Get cart total price
+ * Note: Price removed from SubProduct, so this returns 0
  */
 export async function getCartTotal(): Promise<number> {
-  const items = await getCartItems()
-  return items.reduce((total, item) => total + item.price * item.quantity, 0)
+  return 0
 }
 

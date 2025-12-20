@@ -38,7 +38,11 @@ export default function ProductsPage() {
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
     return categories
-      .filter((c) => c.image && mediaUrl(c.image))
+      .filter((c) => {
+        // Support both old (image) and new (images) format
+        const hasImage = (c.images && c.images.length > 0) || c.image
+        return hasImage && mediaUrl(c.images?.[0] || c.image)
+      })
       .filter((c) => c.name.toLowerCase().includes(q))
   }, [categories, search])
 
@@ -186,7 +190,7 @@ export default function ProductsPage() {
               >
                 <div className="relative h-[260px] md:h-[320px] bg-gray-100 rounded-t-2xl overflow-hidden m-3 mr-3">
                   <Image
-                    src={mediaUrl(category.image)}
+                    src={mediaUrl(category.images?.[0] || category.image)}
                     alt={category.name}
                     fill
                     className="object-cover rounded-xl"

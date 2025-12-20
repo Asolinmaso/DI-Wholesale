@@ -159,7 +159,6 @@ export default function SubProductsPage() {
                       {subProduct.name}
                     </h3>
                     <span className="text-sm text-gray-500 whitespace-nowrap ml-2">
-                      {subProduct.stockCount} packs
                     </span>
                   </div>
                   <div className="flex gap-2 mt-4">

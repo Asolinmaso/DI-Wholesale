@@ -78,8 +78,6 @@ export default function SubProductsListPage() {
         quantity,
         size: selectedSize,
         shape: selectedShape,
-        price: selectedSubProduct.price,
-        stockCount: selectedSubProduct.stockCount,
       })
       setShowModal(false)
       setSelectedSize("")
@@ -178,9 +176,6 @@ export default function SubProductsListPage() {
                     <h3 className="text-base font-semibold text-gray-800 flex-1">
                       {subProduct.name}
                     </h3>
-                    <span className="text-sm text-gray-500 whitespace-nowrap ml-2">
-                      {subProduct.stockCount} packs
-                    </span>
                   </div>
                   <div className="flex gap-2 mt-4">
                     <Link

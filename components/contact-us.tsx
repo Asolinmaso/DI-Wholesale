@@ -29,26 +29,26 @@ export function ContactUs() {
   return (
     <section id="contact" className="py-16 md:py-24 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-16">
           {/* Left Side - Contact Info */}
-          <div className="flex flex-col gap-12 md:gap-16">
-            <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-8 sm:gap-10 md:gap-12 lg:gap-16">
+            <div className="flex flex-col gap-4 sm:gap-5 md:gap-6">
               <div className="flex flex-col gap-2">
-                <h2 className="text-3xl md:text-4xl lg:text-[48px] font-semibold leading-[36px] md:leading-[48px] lg:leading-[72px]">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[48px] font-semibold leading-[28px] sm:leading-[36px] md:leading-[48px] lg:leading-[72px]">
                   <span className="relative">
                     Contact
                     <span
-                      className="absolute bottom-0 left-0 h-[5px] bg-[#7B00E0]"
-                      style={{ width: '145px' }}
+                      className="absolute bottom-0 left-0 h-[3px] sm:h-[4px] md:h-[5px] bg-[#7B00E0]"
+                      style={{ width: '100px', maxWidth: '145px' }}
                     />
                   </span>{" "}
                   <span className="text-[#7B00E0]">Us</span>
                 </h2>
               </div>
-              <p className="text-base md:text-lg lg:text-[24px] leading-[27px] md:leading-[32px] lg:leading-[36px] text-black font-normal">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-[24px] leading-[20px] sm:leading-[24px] md:leading-[28px] lg:leading-[32px] xl:leading-[36px] text-black font-normal">
                 Have questions or need assistance with medical products? Get in touch with our team to discuss your requirements, request quotations, or learn more about our offerings.
               </p>
-              <p className="text-base md:text-lg lg:text-[24px] leading-[27px] md:leading-[32px] lg:leading-[36px] text-black font-normal">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-[24px] leading-[20px] sm:leading-[24px] md:leading-[28px] lg:leading-[32px] xl:leading-[36px] text-black font-normal">
                 Fill out the form and our team will get in touch with you shortly.
               </p>
             </div>
@@ -56,12 +56,12 @@ export function ContactUs() {
 
           {/* Right Side - Form */}
           <div className="flex justify-center lg:justify-end">
-            <div className="w-full max-w-[559px] bg-white border border-[#D9D9D9] rounded-2xl shadow-[0px_0px_24px_rgba(123,0,224,0.25)] p-6">
-              <h3 className="text-center text-[24px] font-semibold leading-[36px] text-[#7B00E0] mb-6">
+            <div className="w-full max-w-[559px] bg-white border border-[#D9D9D9] rounded-2xl shadow-[0px_0px_24px_rgba(123,0,224,0.25)] p-4 sm:p-5 md:p-6">
+              <h3 className="text-center text-lg sm:text-xl md:text-[24px] font-semibold leading-[28px] sm:leading-[32px] md:leading-[36px] text-[#7B00E0] mb-4 sm:mb-5 md:mb-6">
                 Enquiry Form
               </h3>
 
-              <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5 md:gap-6">
                 {/* Name Field */}
                 <div className="flex items-center px-4 py-[10px] border border-[#A5A5A5] rounded-lg">
                   <input

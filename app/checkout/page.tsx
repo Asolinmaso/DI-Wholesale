@@ -98,7 +98,7 @@ export default function CheckoutPage() {
             <Link href="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg">
               <ShoppingCart size={22} className="text-gray-600" />
               <span className="absolute -top-1 -right-1 bg-[#7B00E0] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                {mockCheckoutItems.length}
+                {cartItems.length}
               </span>
             </Link>
           </div>
@@ -146,8 +146,8 @@ export default function CheckoutPage() {
               ))}
             </div>
 
-        {/* Form */}
-        <div className="bg-white">
+            {/* Form */}
+            <div className="bg-white">
           <h2 className="text-2xl font-bold mb-6">Fill Your Details</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -324,7 +324,8 @@ export default function CheckoutPage() {
               </button>
             </div>
           </form>
-          </>
+        </div>
+      </>
         )}
       </section>
 

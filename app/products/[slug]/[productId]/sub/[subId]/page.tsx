@@ -28,7 +28,7 @@ export default function SubProductDetailPage() {
   const [showSizeModal, setShowSizeModal] = useState(false)
   const [selectedSize, setSelectedSize] = useState("")
   const [selectedShape, setSelectedShape] = useState("")
-  const [quantity, setQuantity] = useState(10)
+  const [quantity, setQuantity] = useState(subProduct?.minimumQuantity || 10)
 
   useEffect(() => {
     async function load() {
@@ -43,7 +43,10 @@ export default function SubProductDetailPage() {
 
         const subs = await listSubProducts(productId)
         const sub = subs.find((s) => s._id === subProductId)
-        if (sub) setSubProduct(sub)
+        if (sub) {
+          setSubProduct(sub)
+          setQuantity(sub.minimumQuantity && sub.minimumQuantity > 0 ? sub.minimumQuantity : 10)
+        }
 
         setSuggested(subs.filter((s) => s._id !== subProductId).slice(0, 6))
       } catch (err) {
@@ -72,8 +75,6 @@ export default function SubProductDetailPage() {
         quantity,
         size: selectedSize,
         shape: selectedShape,
-        price: subProduct.price,
-        stockCount: subProduct.stockCount,
       })
       setShowSizeModal(false)
       router.push("/cart")
@@ -91,8 +92,16 @@ export default function SubProductDetailPage() {
     setShowSizeModal(false)
   }
 
-  const sizes = ["5\"", "6\"", "7\"", "8\"", "9\"", "10\"", "11\"", "12\""]
-  const shapes = ["Straight", "Curved", "Teeth", "Plain"]
+  // Parse sizes and shapes from product data, fallback to defaults
+  const sizes = subProduct?.productSize 
+    ? subProduct.productSize.split(',').map(s => s.trim()).filter(Boolean)
+    : ["5\"", "6\"", "7\"", "8\"", "9\"", "10\"", "11\"", "12\""]
+  const shapes = subProduct?.productShape
+    ? subProduct.productShape.split(',').map(s => s.trim()).filter(Boolean)
+    : ["Straight", "Curved", "Teeth", "Plain"]
+  
+  // Use minimumQuantity from product or default to 10
+  const minQuantity = subProduct?.minimumQuantity && subProduct.minimumQuantity > 0 ? subProduct.minimumQuantity : 10
 
   if (loading) {
     return (
@@ -167,7 +176,7 @@ export default function SubProductDetailPage() {
       <section className="container mx-auto px-4 py-6">
         <div className="grid md:grid-cols-2 gap-8">
           {/* Image */}
-          <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center">
+          <div className="bg-gray-50 rounded-2xl p-8 flex flex-col items-center justify-center gap-4">
             <div className="relative w-full h-[350px]">
               <Image
                 src={subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : "/our_products/Surgical_Instruments.jpg"}
@@ -177,14 +186,42 @@ export default function SubProductDetailPage() {
                 unoptimized
               />
             </div>
+            {/* Additional Images (from 2nd image onwards) */}
+            {subProduct.images && subProduct.images.length > 1 && (
+              <div className="grid grid-cols-4 gap-2 w-full mt-4">
+                {subProduct.images.slice(1).map((image, index) => (
+                  <div key={index} className="relative w-full h-20 bg-gray-100 rounded-lg overflow-hidden">
+                    <Image
+                      src={mediaUrl(image)}
+                      alt={`${subProduct.name} ${index + 2}`}
+                      fill
+                      className="object-contain p-2"
+                      unoptimized
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Info */}
           <div>
             <h1 className="text-2xl md:text-3xl font-bold mb-4">{subProduct.name}</h1>
-            <p className="text-gray-600 mb-6">
-              A high-quality surgical instrument designed for clamping blood vessels and controlling bleeding during surgical procedures. Suitable for general and specialized surgical use.
-            </p>
+            {subProduct.description && (
+              <p className="text-gray-600 mb-6">
+                {subProduct.description}
+              </p>
+            )}
+            {subProduct.composition && (
+              <p className="text-gray-700 mb-2">
+                <strong>Composition:</strong> {subProduct.composition}
+              </p>
+            )}
+            {subProduct.packing && (
+              <p className="text-gray-700 mb-6">
+                <strong>Packing:</strong> {subProduct.packing}
+              </p>
+            )}
 
             {/* Size/Shape/Quantity Button */}
             <button
@@ -217,63 +254,46 @@ export default function SubProductDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-t">
-                    <td className="px-5 py-3 text-gray-600">Instrument Type</td>
-                    <td className="px-5 py-3 font-medium">Artery Forceps</td>
-                  </tr>
-                  <tr className="border-t">
-                    <td className="px-5 py-3 text-gray-600">Material</td>
-                    <td className="px-5 py-3 font-medium">Medical-grade Stainless Steel</td>
-                  </tr>
-                  <tr className="border-t">
-                    <td className="px-5 py-3 text-gray-600">Finish</td>
-                    <td className="px-5 py-3 font-medium">Satin / Matte Finish</td>
-                  </tr>
-                  <tr className="border-t">
-                    <td className="px-5 py-3 text-gray-600">Length Options</td>
-                    <td className="px-5 py-3 font-medium">5", 6", 7", 8"</td>
-                  </tr>
-                  <tr className="border-t">
-                    <td className="px-5 py-3 text-gray-600">Shape</td>
-                    <td className="px-5 py-3 font-medium">Straight / Curved</td>
-                  </tr>
-                  <tr className="border-t">
-                    <td className="px-5 py-3 text-gray-600">Tip Type</td>
-                    <td className="px-5 py-3 font-medium">Serrated</td>
-                  </tr>
-                  {subProduct.sku && (
+                  {subProduct.composition && (
                     <tr className="border-t">
-                      <td className="px-5 py-3 text-gray-600">SKU</td>
-                      <td className="px-5 py-3 font-medium">{subProduct.sku}</td>
+                      <td className="px-5 py-3 text-gray-600">Composition</td>
+                      <td className="px-5 py-3 font-medium">{subProduct.composition}</td>
                     </tr>
                   )}
-                  <tr className="border-t">
-                    <td className="px-5 py-3 text-gray-600">Stock</td>
-                    <td className="px-5 py-3 font-medium">{subProduct.stockCount} packs</td>
-                  </tr>
+                  {subProduct.packing && (
+                    <tr className="border-t">
+                      <td className="px-5 py-3 text-gray-600">Packing</td>
+                      <td className="px-5 py-3 font-medium">{subProduct.packing}</td>
+                    </tr>
+                  )}
+                  {subProduct.material && (
+                    <tr className="border-t">
+                      <td className="px-5 py-3 text-gray-600">Material</td>
+                      <td className="px-5 py-3 font-medium">{subProduct.material}</td>
+                    </tr>
+                  )}
+                  {subProduct.productSize && (
+                    <tr className="border-t">
+                      <td className="px-5 py-3 text-gray-600">Size Options</td>
+                      <td className="px-5 py-3 font-medium">{subProduct.productSize}</td>
+                    </tr>
+                  )}
+                  {subProduct.productShape && (
+                    <tr className="border-t">
+                      <td className="px-5 py-3 text-gray-600">Shape Options</td>
+                      <td className="px-5 py-3 font-medium">{subProduct.productShape}</td>
+                    </tr>
+                  )}
+                  {subProduct.minimumQuantity && subProduct.minimumQuantity > 0 && (
+                    <tr className="border-t">
+                      <td className="px-5 py-3 text-gray-600">Minimum Quantity</td>
+                      <td className="px-5 py-3 font-medium">{subProduct.minimumQuantity} pieces</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
 
-            {/* Used In */}
-            <div className="mb-6">
-              <h3 className="font-semibold text-lg mb-3">Used In:</h3>
-              <ul className="space-y-2 text-gray-700">
-                <li>• General Surgery</li>
-                <li>• Gynecological Procedures</li>
-                <li>• Abdominal Surgery</li>
-              </ul>
-            </div>
-
-            {/* Packaging Details */}
-            <div>
-              <h3 className="font-semibold text-lg mb-3">Packaging Details</h3>
-              <ul className="space-y-2 text-gray-700">
-                <li>• Bulk and institutional packaging options available</li>
-                <li>• Quantity per carton configurable as per order volume</li>
-                <li>• Secure, damage-resistant medical packaging suitable for large-scale transport</li>
-              </ul>
-            </div>
           </div>
         </div>
       </section>
@@ -302,10 +322,11 @@ export default function SubProductDetailPage() {
                 </div>
                 <div className="p-4">
                   <h3 className="text-sm font-semibold text-gray-800 mb-1">{prod.name}</h3>
-                  <p className="text-xs text-gray-500 mb-1">{prod.stockCount} pieces</p>
-                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae magna sagittis elit tincidunt gravida.
-                  </p>
+                  {prod.description && (
+                    <p className="text-xs text-gray-500 mb-3 line-clamp-2">
+                      {prod.description}
+                    </p>
+                  )}
                   <div className="flex gap-2">
                     <Link
                       href={`/products/${slug}/${productId}/sub/${prod._id}`}
@@ -380,7 +401,7 @@ export default function SubProductDetailPage() {
             <div className="mb-6">
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => setQuantity((q) => Math.max(10, q - 1))}
+                  onClick={() => setQuantity((q) => Math.max(minQuantity, q - 1))}
                   className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0]"
                 >
                   −
@@ -388,9 +409,9 @@ export default function SubProductDetailPage() {
                 <input
                   type="number"
                   value={quantity}
-                  onChange={(e) => setQuantity(Math.max(10, parseInt(e.target.value) || 10))}
+                  onChange={(e) => setQuantity(Math.max(minQuantity, parseInt(e.target.value) || minQuantity))}
                   className="w-24 h-12 border-2 border-gray-300 rounded-lg text-center text-xl font-medium"
-                  min={10}
+                  min={minQuantity}
                 />
                 <button
                   onClick={() => setQuantity((q) => q + 1)}
@@ -399,7 +420,7 @@ export default function SubProductDetailPage() {
                   +
                 </button>
               </div>
-              <p className="text-gray-500 mt-3">Note : Minimum Quantity Should be 10 pcs</p>
+              <p className="text-gray-500 mt-3">Note : Minimum Quantity Should be {minQuantity} pcs</p>
             </div>
 
             <div className="flex justify-end mt-8">

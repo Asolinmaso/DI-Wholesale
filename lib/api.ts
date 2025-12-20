@@ -2,7 +2,8 @@ export type Category = {
   _id: string
   name: string
   slug: string
-  image?: string
+  images: string[]
+  image?: string // Support old format for backward compatibility
 }
 
 export type Product = {
@@ -23,10 +24,14 @@ export type SubProduct = {
   _id: string
   productId: string
   name: string
-  sku?: string
-  price: number
-  stockCount: number
   images: string[]
+  productSize?: string
+  productShape?: string
+  minimumQuantity?: number
+  material?: string
+  description?: string
+  composition?: string
+  packing?: string
 }
 
 function apiBaseUrl() {

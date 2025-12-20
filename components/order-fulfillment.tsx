@@ -71,12 +71,12 @@ export function OrderFulfillment() {
     <section id="fulfillment" className="py-16 md:py-24 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
-        <div className="mb-12 md:mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#1E1E1E] mb-6 max-w-2xl" style={{ lineHeight: '4rem' }}>
+        <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-16 px-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#1E1E1E] mb-4 sm:mb-6 max-w-2xl leading-tight sm:leading-normal" style={{ lineHeight: '1.2' }}>
             From <span className="text-[#7B00E0]">Product Discovery</span> to <span className="text-[#7B00E0] relative">
               Order Fulfillment
               <span
-                className="absolute bottom-0 left-0 h-[5px] bg-[#7B00E0]"
+                className="absolute bottom-0 left-0 h-[3px] sm:h-[4px] md:h-[5px] bg-[#7B00E0]"
                 style={{ width: '60%' }}
               />
             </span>
@@ -86,7 +86,7 @@ export function OrderFulfillment() {
         {/* Content Grid - Timeline Left, Image Right */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
           {/* Timeline on Left */}
-          <div className="relative">
+          <div className="relative order-2 lg:order-1">
             {/* Vertical Timeline Line - single line that stops at last step icon center */}
             {/* Mobile line */}
             <div 
@@ -171,8 +171,8 @@ export function OrderFulfillment() {
           </div>
 
           {/* Image on Right */}
-          <div className="flex items-center">
-            <div className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-lg overflow-hidden bg-gray-100">
+          <div className="flex items-center order-1 lg:order-2">
+            <div className="relative w-full h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] xl:h-[600px] rounded-lg overflow-hidden bg-gray-100">
               <Image
                 src="/Order_fulltilment.png"
                 alt="Order fulfillment and warehouse"

@@ -4,20 +4,28 @@ import Image from "next/image"
 
 const partners = [
   {
-    name: "Client 1",
-    image: "/our_clients/Client-1.png",
+    name: "Alkem",
+    image: "/our_clients/Alkem.png",
   },
   {
-    name: "Client 2",
-    image: "/our_clients/Client-2.png",
+    name: "Cipla",
+    image: "/our_clients/Cipla.png",
   },
   {
-    name: "Client 3",
-    image: "/our_clients/Client-3.png",
+    name: "Cipla Vista",
+    image: "/our_clients/CiplaVista.png",
   },
   {
-    name: "Client 4",
-    image: "/our_clients/Client-4.png",
+    name: "Dr. Reddy's",
+    image: "/our_clients/Dr.Reddys.png",
+  },
+  {
+    name: "Labaxy",
+    image: "/our_clients/Labaxy.png",
+  },
+  {
+    name: "Sun Pharma",
+    image: "/our_clients/Sun_Pharma.png",
   },
 ]
 
@@ -29,15 +37,15 @@ export function ClientsPartners() {
     <section id="clients-partners" className="py-16 md:py-24 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
-        <div className="mb-12 md:mb-16 flex justify-center">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center">
+        <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-16 flex justify-center px-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center">
             <span className="text-gray-600">Our</span>{" "}
             <span className="text-[#7B00E0] relative">
               Clients
               <span className="text-[#1E1E1E]"> & </span>
               Partners
               <span
-                className="absolute bottom-0 left-0 h-[5px] bg-[#7B00E0]"
+                className="absolute bottom-0 left-0 h-[3px] sm:h-[4px] md:h-[5px] bg-[#7B00E0]"
                 style={{ width: '100%' }}
               />
             </span>
@@ -66,7 +74,7 @@ export function ClientsPartners() {
             {duplicatedPartners.map((partner, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 mx-4 md:mx-8 flex items-center justify-center w-[200px] h-[120px]"
+                className="flex-shrink-0 mx-3 sm:mx-4 md:mx-6 lg:mx-8 flex items-center justify-center w-[150px] h-[90px] sm:w-[180px] sm:h-[110px] md:w-[200px] md:h-[120px]"
               >
                 <div className="relative w-full h-full transition-all duration-300">
                   <Image
