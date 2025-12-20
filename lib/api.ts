@@ -9,6 +9,10 @@ export type Product = {
   _id: string
   name: string
   description?: string
+  productSize?: string
+  productShape?: string
+  minimumQuantity?: number
+  material?: string
   categoryId: string
   price: number
   stockCount: number
@@ -66,6 +70,14 @@ export async function createCategory(form: FormData): Promise<Category> {
   return res.data
 }
 
+export async function updateCategory(id: string, form: FormData): Promise<Category> {
+  const res = await fetchJson<{ data: Category }>(apiUrl(`/api/categories/${id}`), {
+    method: "PUT",
+    body: form,
+  })
+  return res.data
+}
+
 export async function deleteCategory(id: string): Promise<void> {
   await fetchJson(apiUrl(`/api/categories/${id}`), { method: "DELETE" })
 }
@@ -91,6 +103,14 @@ export async function createProduct(form: FormData): Promise<Product> {
   return res.data
 }
 
+export async function updateProduct(id: string, form: FormData): Promise<Product> {
+  const res = await fetchJson<{ data: Product }>(apiUrl(`/api/products/${id}`), {
+    method: "PUT",
+    body: form,
+  })
+  return res.data
+}
+
 export async function deleteProduct(id: string): Promise<void> {
   await fetchJson(apiUrl(`/api/products/${id}`), { method: "DELETE" })
 }
@@ -105,6 +125,14 @@ export async function listSubProducts(productId: string): Promise<SubProduct[]> 
 export async function createSubProduct(productId: string, form: FormData): Promise<SubProduct> {
   const res = await fetchJson<{ data: SubProduct }>(apiUrl(`/api/products/${productId}/sub-products`), {
     method: "POST",
+    body: form,
+  })
+  return res.data
+}
+
+export async function updateSubProduct(productId: string, subId: string, form: FormData): Promise<SubProduct> {
+  const res = await fetchJson<{ data: SubProduct }>(apiUrl(`/api/products/${productId}/sub-products/${subId}`), {
+    method: "PUT",
     body: form,
   })
   return res.data

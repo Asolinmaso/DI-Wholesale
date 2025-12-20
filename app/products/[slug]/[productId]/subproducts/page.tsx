@@ -8,12 +8,10 @@ import { Search, ArrowLeft, Bookmark, Filter, ShoppingCart, ArrowRight, ChevronL
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { getProduct, listSubProducts, listCategories, mediaUrl, Product, SubProduct, Category } from "@/lib/api"
-import { useCart } from "@/lib/cart-context"
 
-export default function SubProductsListPage() {
+export default function SubProductsPage() {
   const params = useParams()
   const router = useRouter()
-  const { cartCount } = useCart()
   const slug = params.slug as string
   const productId = params.productId as string
   
@@ -44,8 +42,8 @@ export default function SubProductsListPage() {
 
         const subs = await listSubProducts(productId)
         setSubProducts(subs)
-      } catch (err) {
-        console.error("Failed to load", err)
+      } catch {
+        console.error("Failed to load")
       } finally {
         setLoading(false)
       }
@@ -64,32 +62,16 @@ export default function SubProductsListPage() {
     setShowModal(true)
   }
 
-  const { addToCart } = useCart()
-
-  const handleConfirmAddToCart = async () => {
-    if (!selectedSubProduct || !product || !selectedSize || !selectedShape) return
-    
-    try {
-      await addToCart({
-        productId: product._id,
-        subProductId: selectedSubProduct._id,
-        name: selectedSubProduct.name,
-        image: selectedSubProduct.images?.[0] ? mediaUrl(selectedSubProduct.images[0]) : "",
-        quantity,
-        size: selectedSize,
-        shape: selectedShape,
-        price: selectedSubProduct.price,
-        stockCount: selectedSubProduct.stockCount,
-      })
-      setShowModal(false)
-      setSelectedSize("")
-      setSelectedShape("")
-      setQuantity(10)
-      router.push("/cart")
-    } catch (error) {
-      console.error("Failed to add to cart:", error)
-      alert("Failed to add item to cart. Please try again.")
-    }
+  const handleConfirmAddToCart = () => {
+    // TODO: Add to cart logic
+    console.log({
+      product: selectedSubProduct,
+      size: selectedSize,
+      shape: selectedShape,
+      quantity,
+    })
+    setShowModal(false)
+    router.push("/cart")
   }
 
   const sizes = ["5\"", "6\"", "7\"", "8\"", "9\"", "10\"", "11\"", "12\""]
@@ -138,11 +120,9 @@ export default function SubProductsListPage() {
             </button>
             <Link href="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg">
               <ShoppingCart size={22} className="text-gray-600" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#7B00E0] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                  {cartCount > 99 ? "99+" : cartCount}
-                </span>
-              )}
+              <span className="absolute -top-1 -right-1 bg-[#7B00E0] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                0
+              </span>
             </Link>
           </div>
         </div>
@@ -237,7 +217,7 @@ export default function SubProductsListPage() {
       {/* Add to Cart Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-4xl w-full relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl p-8 max-w-4xl w-full relative">
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-6 right-6 text-gray-400 hover:text-gray-600"
@@ -333,3 +313,4 @@ export default function SubProductsListPage() {
     </main>
   )
 }
+

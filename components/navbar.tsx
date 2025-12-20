@@ -3,9 +3,10 @@
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
-import { Menu, X } from "lucide-react"
+import { Menu, X, ShoppingCart, Bookmark, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useCart } from "@/lib/cart-context"
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -18,6 +19,7 @@ const navItems = [
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const { cartCount } = useCart()
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/"
@@ -65,22 +67,40 @@ export function Navbar() {
                 </Link>
               )
             ))}
+            {/* Cart Icon */}
+            <Link href="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg">
+              <ShoppingCart size={22} className="text-gray-600" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#7B00E0] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </Link>
           </div>
 
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle menu"
-          >
-            {isOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </Button>
+          {/* Mobile Icons */}
+          <div className="flex items-center gap-2 md:hidden">
+            <Link href="/cart" className="relative p-2">
+              <ShoppingCart size={22} className="text-gray-600" />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 bg-[#7B00E0] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle menu"
+            >
+              {isOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}

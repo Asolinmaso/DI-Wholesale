@@ -1,17 +1,25 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Search, ArrowUpRight, Bookmark, Filter, ShoppingCart, ArrowRight } from "lucide-react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
-import { listCategories, mediaUrl, Category } from "@/lib/api"
+import { listCategories, listProducts, mediaUrl, Category, type Product } from "@/lib/api"
+import { useCart } from "@/lib/cart-context"
 
 export default function ProductsPage() {
+  const router = useRouter()
+  const { cartCount } = useCart()
   const [categories, setCategories] = useState<Category[]>([])
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(true)
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+  const [productTypes, setProductTypes] = useState<Product[]>([])
+  const [productTypesLoading, setProductTypesLoading] = useState(false)
+  const [productTypesError, setProductTypesError] = useState("")
 
   useEffect(() => {
     async function load() {
@@ -27,9 +35,34 @@ export default function ProductsPage() {
     load()
   }, [])
 
-  const filtered = categories.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase()
+    return categories
+      .filter((c) => c.image && mediaUrl(c.image))
+      .filter((c) => c.name.toLowerCase().includes(q))
+  }, [categories, search])
+
+  async function openCategoryModal(category: Category) {
+    setSelectedCategory(category)
+    setProductTypes([])
+    setProductTypesError("")
+    setProductTypesLoading(true)
+    try {
+      const prods = await listProducts(category._id)
+      setProductTypes(prods)
+    } catch (e: unknown) {
+      setProductTypesError(e instanceof Error ? e.message : "Failed to load product types")
+    } finally {
+      setProductTypesLoading(false)
+    }
+  }
+
+  function closeCategoryModal() {
+    setSelectedCategory(null)
+    setProductTypes([])
+    setProductTypesError("")
+    setProductTypesLoading(false)
+  }
 
   return (
     <main className="min-h-screen bg-white">
@@ -37,23 +70,67 @@ export default function ProductsPage() {
 
       {/* Banner */}
       <section
-        className="relative pt-20 pb-12 bg-cover bg-center"
+        className="relative mt-20 pb-32 bg-cover bg-center"
         style={{ backgroundImage: "url('/Product_Banner.png')" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-white/80 to-transparent" />
-        <div className="relative container mx-auto px-4 pt-8 pb-4">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            Medical Product <span className="text-[#7B00E0]">Categories</span>
+        <div className="absolute" />
+        <div className="relative container mx-auto px-4 flex flex-col items-center">
+          {/* Medical Product Categories Heading */}
+          <h1
+            className="text-[48px] font-semibold mb-0 leading-[72px] text-[#1E1E1E] text-center"
+            style={{ 
+              fontFamily: 'var(--font-poppins), Poppins, sans-serif',
+              fontWeight: 600,
+              width: '677px',
+              marginTop: '48px'
+            }}
+          >
+            Medical Product Categories
           </h1>
-          <p className="text-gray-600 max-w-xl mb-4">
+
+          {/* Description */}
+          <p
+            className="text-2xl font-normal leading-[36px] text-[#454242] text-center max-w-[765px]"
+            style={{ 
+              fontFamily: 'var(--font-poppins), Poppins, sans-serif',
+              fontWeight: 400,
+              marginTop: '4px'
+            }}
+          >
             Browse our certified medical supplies by category. Designed for bulk and institutional procurement.
           </p>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-[#7B00E0] font-medium">Explore products</span>
-            <ArrowRight size={16} className="text-gray-400" />
-            <span className="text-gray-400">add to cart</span>
-            <ArrowRight size={16} className="text-gray-400" />
-            <span className="text-gray-400">fill details enquire</span>
+
+          {/* Navigation Links */}
+          <div
+            style={{ 
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: '0px',
+              gap: '24px',
+              position: 'absolute',
+              width: '728px',
+              height: '36px',
+              left: 'calc(50% - 728px/2 + 1px)',
+              top: '232px',
+              fontFamily: 'var(--font-poppins), Poppins, sans-serif',
+            }}
+          >
+            <span className="text-2xl font-medium leading-[36px] text-[#7B00E0]" style={{ fontWeight: 500 }}>
+              Explore products
+            </span>
+            <svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0.000234604 9H18.3752L10.5002 1.125L11.4902 0L21.2402 9.75L11.4902 19.5L10.5002 18.375L18.3752 10.5H0.000234604V9Z" fill="#848383"/>
+            </svg>
+            <span className="text-2xl font-normal leading-[36px] text-[#848383]" style={{ fontWeight: 400 }}>
+              add to cart
+            </span>
+            <svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0.000234604 9H18.3752L10.5002 1.125L11.4902 0L21.2402 9.75L11.4902 19.5L10.5002 18.375L18.3752 10.5H0.000234604V9Z" fill="#848383"/>
+            </svg>
+            <span className="text-2xl font-normal leading-[36px] text-[#848383]" style={{ fontWeight: 400 }}>
+              fill details enquire
+            </span>
           </div>
         </div>
       </section>
@@ -80,12 +157,14 @@ export default function ProductsPage() {
             <button className="p-2 hover:bg-gray-100 rounded-lg">
               <Filter size={22} className="text-gray-600" />
             </button>
-            <button className="relative p-2 hover:bg-gray-100 rounded-lg">
+            <Link href="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg">
               <ShoppingCart size={22} className="text-gray-600" />
-              <span className="absolute -top-1 -right-1 bg-[#7B00E0] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                0
-              </span>
-            </button>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#7B00E0] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </Link>
           </div>
         </div>
       </section>
@@ -99,14 +178,15 @@ export default function ProductsPage() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {filtered.map((category) => (
-              <Link
+              <button
                 key={category._id}
-                href={`/products/${category.slug}`}
-                className="p-3 bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer group border border-gray-100"
+                type="button"
+                onClick={() => openCategoryModal(category)}
+                className="text-left p-3 bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer group border border-gray-100"
               >
                 <div className="relative h-[260px] md:h-[320px] bg-gray-100 rounded-t-2xl overflow-hidden m-3 mr-3">
                   <Image
-                    src={category.image ? mediaUrl(category.image) : "/our_products/Surgical_Instruments.jpg"}
+                    src={mediaUrl(category.image)}
                     alt={category.name}
                     fill
                     className="object-cover rounded-xl"
@@ -121,11 +201,72 @@ export default function ProductsPage() {
                     <ArrowUpRight className="w-5 h-5 text-white" />
                   </div>
                 </div>
-              </Link>
+              </button>
             ))}
           </div>
         )}
       </section>
+
+      {/* Category -> Product Types Modal */}
+      {selectedCategory && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Select Product Type"
+        >
+          <button
+            type="button"
+            aria-label="Close modal"
+            onClick={closeCategoryModal}
+            className="absolute inset-0 bg-black/70"
+          />
+          <div className="relative w-[min(1100px,92vw)] bg-white rounded-[48px] shadow-2xl border border-gray-200 overflow-hidden">
+            <div className="p-10 md:p-14">
+              <div className="flex items-start justify-between gap-6">
+                <h2
+                  className="text-2xl font-semibold text-[#7B00E0]"
+                  style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                >
+                  Select Product Type
+                </h2>
+                <button
+                  type="button"
+                  onClick={closeCategoryModal}
+                  aria-label="Close"
+                  className="text-gray-400 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="mt-8">
+                {productTypesLoading ? (
+                  <div className="text-gray-500">Loading...</div>
+                ) : productTypesError ? (
+                  <div className="text-red-600">{productTypesError}</div>
+                ) : productTypes.length === 0 ? (
+                  <div className="text-gray-500">No product types found.</div>
+                ) : (
+                  <div className="flex flex-wrap gap-4">
+                    {productTypes.map((p) => (
+                      <button
+                        key={p._id}
+                        type="button"
+                        onClick={() => router.push(`/products/${selectedCategory.slug}/${p._id}`)}
+                        className="px-6 py-3 rounded-xl bg-[#D9D9D9] border border-[#8A8A8A] text-base text-black hover:bg-gray-200 transition-colors"
+                        style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </main>
