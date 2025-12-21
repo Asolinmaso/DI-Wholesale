@@ -56,12 +56,12 @@ export function OurProducts() {
             <span className="text-[#7B00E0] relative">
               Products
               <span
-                className="absolute bottom-[-8px] sm:bottom-[-10px] left-0 h-[3px] sm:h-[4px] md:h-[5px] bg-[#7B00E0]"
+                className="absolute bottom-[-9px] sm:bottom-[-14px] left-0 h-[3px] sm:h-[4px] md:h-[5px] bg-[#7B00E0]"
                 style={{ width: '60%' }}
               />
             </span>
           </h2>
-          <p className="text-sm sm:text-base md:text-lg max-w-3xl leading-relaxed mt-4 sm:mt-6">
+          <p className="text-sm sm:text-base md:text-lg max-w-4xl leading-relaxed mt-4 sm:mt-6">
             Explore our wide range of certified medical instruments, surgical equipment, and pharmaceutical products designed to meet hospital and clinical standards.
           </p>
         </div>
@@ -111,6 +111,26 @@ export function OurProducts() {
             ))}
           </div>
         )}
+
+        {/* Explore All Products Button */}
+        <div className="flex justify-center mt-8 md:mt-12">
+          <Link
+            href="/products"
+            className="inline-flex items-center justify-center gap-3 bg-[#7B00E0] text-white font-medium text-lg px-4 py-3 rounded-lg hover:bg-[#6A00C7] transition-colors"
+            style={{
+              fontFamily: 'Poppins, sans-serif',
+              fontSize: '24px',
+              lineHeight: '36px',
+              padding: '12px 18px',
+              gap: '12px',
+              width: '272px',
+              height: '60px',
+              borderRadius: '8px'
+            }}
+          >
+            Explore All Products
+          </Link>
+        </div>
 
         {error ? (
           <p className="text-sm text-red-600 mt-4 text-center">{error}</p>

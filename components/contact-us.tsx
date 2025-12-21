@@ -38,14 +38,14 @@ export function ContactUs() {
                   <span className="relative">
                     Contact
                     <span
-                      className="absolute bottom-0 left-0 h-[3px] sm:h-[4px] md:h-[5px] bg-[#7B00E0]"
-                      style={{ width: '100px', maxWidth: '145px' }}
+                      className="absolute bottom-[-9px] sm:bottom-[-14px] left-0 h-[3px] sm:h-[4px] md:h-[5px] bg-[#7B00E0]"
+                      style={{ width: '65%' }}
                     />
                   </span>{" "}
                   <span className="text-[#7B00E0]">Us</span>
                 </h2>
               </div>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-[24px] leading-[20px] sm:leading-[24px] md:leading-[28px] lg:leading-[32px] xl:leading-[36px] text-black font-normal">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-[24px] leading-[20px] sm:leading-[24px] md:leading-[28px] lg:leading-[32px] xl:leading-[36px] text-black ">
                 Have questions or need assistance with medical products? Get in touch with our team to discuss your requirements, request quotations, or learn more about our offerings.
               </p>
               <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-[24px] leading-[20px] sm:leading-[24px] md:leading-[28px] lg:leading-[32px] xl:leading-[36px] text-black font-normal">

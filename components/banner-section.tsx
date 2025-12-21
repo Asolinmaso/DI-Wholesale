@@ -15,7 +15,7 @@ export function BannerSection() {
 
   return (
     <section 
-      className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] lg:h-[850px] xl:h-[900px] overflow-visible"
+      className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] lg:h-[750px] xl:h-[750px] overflow-visible mt-20"
       style={{
         background: "linear-gradient(270deg, rgba(255, 255, 255, 0.1) 15%, #7B00E0 81%), url(/Banner_Section.png)",
         backgroundSize: "cover",
@@ -24,13 +24,13 @@ export function BannerSection() {
       }}
     >
       {/* Content */}
-      <div className="relative z-20 container mx-auto h-full flex items-center pt-20 md:pt-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl w-full">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight">
+      <div className="relative z-20 container mx-auto h-full flex pt-8 md:pt-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl w-full mt-16">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-bold text-white mb-4 sm:mb-6" style={{ lineHeight: '5.1rem' }}>
             Your Trusted Partner in Medical & Hospital Supplies
           </h1>
-          
-          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 mb-6 sm:mb-8 leading-relaxed">
+
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white mb-6 sm:mb-8 leading-relaxed">
             Delivering high-quality medicines, surgical products, and hospital furniture with reliability, transparency, and competitive pricing.
           </p>
 

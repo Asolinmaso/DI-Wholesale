@@ -4,9 +4,10 @@ import { useState, useEffect, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Search, ArrowUpRight, Bookmark, Filter, ShoppingCart, ArrowRight } from "lucide-react"
+import { Search, ArrowUpRight, ArrowRight, X } from "lucide-react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
+import { ProductToolbar } from "@/components/product-toolbar"
 import { listCategories, listProducts, mediaUrl, Category, type Product } from "@/lib/api"
 import { useCart } from "@/lib/cart-context"
 
@@ -20,6 +21,13 @@ export default function ProductsPage() {
   const [productTypes, setProductTypes] = useState<Product[]>([])
   const [productTypesLoading, setProductTypesLoading] = useState(false)
   const [productTypesError, setProductTypesError] = useState("")
+  const [showFilterModal, setShowFilterModal] = useState(false)
+  const [selectedFilters, setSelectedFilters] = useState({
+    size: [] as string[],
+    shape: [] as string[],
+    therapeuticCategory: [] as string[],
+    dosageForm: [] as string[]
+  })
 
   useEffect(() => {
     async function load() {
@@ -140,7 +148,7 @@ export default function ProductsPage() {
       </section>
 
       {/* Search & Filters */}
-      <section className="container mx-auto px-4 py-6">
+      <section className="container mx-auto px-4 py-6 border-t border-b border-gray-300">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <input
@@ -154,22 +162,10 @@ export default function ProductsPage() {
               <Search size={18} />
             </button>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Bookmark size={22} className="text-gray-600" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Filter size={22} className="text-gray-600" />
-            </button>
-            <Link href="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg">
-              <ShoppingCart size={22} className="text-gray-600" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#7B00E0] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                  {cartCount > 99 ? "99+" : cartCount}
-                </span>
-              )}
-            </Link>
-          </div>
+          <ProductToolbar 
+            onFilterClick={() => setShowFilterModal(true)}
+            cartCount={cartCount}
+          />
         </div>
       </section>
 
@@ -211,6 +207,193 @@ export default function ProductsPage() {
         )}
       </section>
 
+      {/* Filter Modal */}
+      {showFilterModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Filter Products"
+        >
+          <button
+            type="button"
+            aria-label="Close modal"
+            onClick={() => setShowFilterModal(false)}
+            className="absolute inset-0 bg-black/70"
+          />
+          <div className="relative w-[min(90vw,800px)] max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+              <h2
+                className="text-2xl font-semibold text-[#7B00E0]"
+                style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+              >
+                Filters
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowFilterModal(false)}
+                aria-label="Close"
+                className="text-gray-400 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-6 space-y-8">
+              {/* Size Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-[#7B00E0] mb-4" style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}>
+                  Size
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {["5\"", "6\"", "7\"", "8\"", "9\"", "10\"", "11\"", "12\""].map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFilters(prev => ({
+                          ...prev,
+                          size: prev.size.includes(size)
+                            ? prev.size.filter(s => s !== size)
+                            : [...prev.size, size]
+                        }))
+                      }}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                        selectedFilters.size.includes(size)
+                          ? "bg-[#7B00E0] text-white border-[#7B00E0]"
+                          : "bg-gray-100 text-black border-gray-300 hover:bg-gray-200"
+                      }`}
+                      style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Shape Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-[#7B00E0] mb-4" style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}>
+                  Shape
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {["Straight", "Curved", "Teeth", "Plain"].map((shape) => (
+                    <button
+                      key={shape}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFilters(prev => ({
+                          ...prev,
+                          shape: prev.shape.includes(shape)
+                            ? prev.shape.filter(s => s !== shape)
+                            : [...prev.shape, shape]
+                        }))
+                      }}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                        selectedFilters.shape.includes(shape)
+                          ? "bg-[#7B00E0] text-white border-[#7B00E0]"
+                          : "bg-gray-100 text-black border-gray-300 hover:bg-gray-200"
+                      }`}
+                      style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                    >
+                      {shape}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Therapeutic Category Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-[#7B00E0] mb-4" style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}>
+                  Therapeutic Category
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {["Cardiac", "Antibiotic", "Pain Relief", "Gastro", "Neuro", "Diabetic"].map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFilters(prev => ({
+                          ...prev,
+                          therapeuticCategory: prev.therapeuticCategory.includes(category)
+                            ? prev.therapeuticCategory.filter(c => c !== category)
+                            : [...prev.therapeuticCategory, category]
+                        }))
+                      }}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                        selectedFilters.therapeuticCategory.includes(category)
+                          ? "bg-[#7B00E0] text-white border-[#7B00E0]"
+                          : "bg-gray-100 text-black border-gray-300 hover:bg-gray-200"
+                      }`}
+                      style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dosage Form Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-[#7B00E0] mb-4" style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}>
+                  Dosage Form
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {["Tablet", "Capsule", "Syrup", "Injection"].map((form) => (
+                    <button
+                      key={form}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFilters(prev => ({
+                          ...prev,
+                          dosageForm: prev.dosageForm.includes(form)
+                            ? prev.dosageForm.filter(f => f !== form)
+                            : [...prev.dosageForm, form]
+                        }))
+                      }}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                        selectedFilters.dosageForm.includes(form)
+                          ? "bg-[#7B00E0] text-white border-[#7B00E0]"
+                          : "bg-gray-100 text-black border-gray-300 hover:bg-gray-200"
+                      }`}
+                      style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                    >
+                      {form}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedFilters({
+                      size: [],
+                      shape: [],
+                      therapeuticCategory: [],
+                      dosageForm: []
+                    })
+                  }}
+                  className="flex-1 px-6 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                  style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                >
+                  Clear All
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowFilterModal(false)}
+                  className="flex-1 px-6 py-3 rounded-lg bg-[#7B00E0] text-white hover:bg-[#6a00c4] transition-colors"
+                  style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Category -> Product Types Modal */}
       {selectedCategory && (
         <div
@@ -226,7 +409,7 @@ export default function ProductsPage() {
             className="absolute inset-0 bg-black/70"
           />
           <div className="relative w-[min(1100px,92vw)] bg-white rounded-[48px] shadow-2xl border border-gray-200 overflow-hidden">
-            <div className="p-10 md:p-14">
+            <div className="p-10">
               <div className="flex items-start justify-between gap-6">
                 <h2
                   className="text-2xl font-semibold text-[#7B00E0]"
@@ -238,7 +421,7 @@ export default function ProductsPage() {
                   type="button"
                   onClick={closeCategoryModal}
                   aria-label="Close"
-                  className="text-gray-400 hover:text-gray-700 text-2xl"
+                  className="hover:text-gray-700 text-4xl"
                 >
                   ×
                 </button>

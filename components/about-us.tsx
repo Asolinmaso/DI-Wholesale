@@ -24,21 +24,20 @@ export function AboutUs() {
           <div className="flex flex-col justify-start order-1 lg:order-2 lg:h-[400px] pt-0">
             <div className="space-y-3 sm:space-y-4 md:space-y-5 flex-1">
               <h2
-                className="font-poppins text-[#1E1E1E] text-2xl sm:text-3xl md:text-4xl lg:text-[48px] leading-[30px] sm:leading-[36px] md:leading-[48px] lg:leading-[72px] relative"
+                className="font-poppins text-2xl sm:text-3xl md:text-4xl lg:text-[48px] leading-[30px] sm:leading-[36px] md:leading-[48px] lg:leading-[72px] relative"
                 style={{
                   fontFamily: 'var(--font-poppins), sans-serif',
                   fontWeight: 600,
-                  color: '#1E1E1E',
                   paddingBottom: '8px',
                 }}
               >
-                About Us
+                About <span style={{ color: '#7B00E0' }}>Us</span>
                 <span
                   className="absolute bottom-0 left-0 h-[3px] sm:h-[4px] md:h-[5px] bg-[#7B00E0]"
                   style={{ width: '25%' }}
                 />
               </h2>
-              <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed">
+              <p className="text-gray-700 text-sm sm:text-base md:text-xl" style={{ lineHeight: '1.9rem' }}>
                 DI Wholesale is a dedicated medical supply venture committed to providing hospitals, clinics, and healthcare distributors with high-quality medicines, surgical consumables, and advanced hospital furniture. We focus on delivering dependable products that support patient care, safety, and overall healthcare excellence. DI Wholesale is a dedicated medical supply venture committed to providing hospitals, clinics, and healthcare distributors with high-quality medicines, surgical consumables, and advanced hospital furniture. We focus on delivering dependable products that support patient care, safety, and overall healthcare excellence.
               </p>
             </div>

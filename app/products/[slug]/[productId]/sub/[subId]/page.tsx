@@ -4,9 +4,10 @@ import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { Search, ArrowLeft, Bookmark, Filter, ShoppingCart, ArrowRight, ChevronDown, X } from "lucide-react"
+import { Search, ArrowLeft, ArrowRight, X } from "lucide-react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
+import { ProductToolbar } from "@/components/product-toolbar"
 import { getProduct, listSubProducts, listCategories, mediaUrl, Product, SubProduct, Category } from "@/lib/api"
 import { useCart } from "@/lib/cart-context"
 
@@ -29,6 +30,13 @@ export default function SubProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState("")
   const [selectedShape, setSelectedShape] = useState("")
   const [quantity, setQuantity] = useState(subProduct?.minimumQuantity || 10)
+  const [showFilterModal, setShowFilterModal] = useState(false)
+  const [selectedFilters, setSelectedFilters] = useState({
+    size: [] as string[],
+    shape: [] as string[],
+    therapeuticCategory: [] as string[],
+    dosageForm: [] as string[]
+  })
 
   useEffect(() => {
     async function load() {
@@ -141,7 +149,7 @@ export default function SubProductDetailPage() {
       </section>
 
       {/* Search & Filters */}
-      <section className="container mx-auto px-4 py-4">
+      <section className="container mx-auto px-4 py-4 border-t border-b border-gray-300">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <input
@@ -153,22 +161,10 @@ export default function SubProductDetailPage() {
               <Search size={18} />
             </button>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Bookmark size={22} className="text-gray-600" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Filter size={22} className="text-gray-600" />
-            </button>
-            <Link href="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg">
-              <ShoppingCart size={22} className="text-gray-600" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#7B00E0] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                  {cartCount > 99 ? "99+" : cartCount}
-                </span>
-              )}
-            </Link>
-          </div>
+          <ProductToolbar 
+            onFilterClick={() => setShowFilterModal(true)}
+            cartCount={cartCount}
+          />
         </div>
       </section>
 
@@ -226,7 +222,7 @@ export default function SubProductDetailPage() {
             {/* Size/Shape/Quantity Button */}
             <button
               onClick={handleSelectSizeShape}
-              className="w-full md:w-auto border border-gray-300 rounded-lg px-6 py-3 text-base font-medium flex items-center justify-between gap-4 mb-4 hover:border-[#7B00E0]"
+              className="w-full md:w-auto border border-gray-300 rounded-lg px-6 py-3 text-base flex items-center justify-between gap-4 mb-4 hover:border-[#7B00E0]"
             >
               <span>
                 {selectedSize && selectedShape 
@@ -234,20 +230,22 @@ export default function SubProductDetailPage() {
                   : "Select Size, Shape & Quantity"
                 }
               </span>
-              <ChevronDown size={20} />
+              <svg width="20" height="12" viewBox="0 0 20 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0.825786 4.46821L8.03978 11.2358C8.29746 11.4781 8.60354 11.6703 8.94049 11.8014C9.27744 11.9325 9.63864 12 10.0034 12C10.3682 12 10.7294 11.9325 11.0664 11.8014C11.4033 11.6703 11.7094 11.4781 11.9671 11.2358L19.1811 4.46821C20.9358 2.82203 19.6824 0 17.2035 0H2.77551C0.296573 0 -0.92897 2.82203 0.825786 4.46821Z" fill="#8A8A8A"/>
+              </svg>
             </button>
 
             <button
               onClick={handleAddToCart}
-              className="w-full md:w-auto bg-[#7B00E0] text-white px-12 py-3 rounded-full font-semibold hover:bg-[#6a00c4] mb-8"
+              className="w-full bg-[#7B00E0] text-white px-12 py-4 rounded-lg font-semibold hover:bg-[#6a00c4] mb-8"
             >
               Add to Cart
             </button>
 
             {/* Attributes Table */}
-            <div className="border rounded-xl overflow-hidden mb-6">
+            <div className="border rounded-xl overflow-hidden mb-6 max-w-xl">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-100">
                   <tr>
                     <th className="text-left px-5 py-3 font-semibold text-gray-700">Attribute</th>
                     <th className="text-left px-5 py-3 font-semibold text-gray-700">Details</th>
@@ -255,37 +253,37 @@ export default function SubProductDetailPage() {
                 </thead>
                 <tbody>
                   {subProduct.composition && (
-                    <tr className="border-t">
+                    <tr>
                       <td className="px-5 py-3 text-gray-600">Composition</td>
                       <td className="px-5 py-3 font-medium">{subProduct.composition}</td>
                     </tr>
                   )}
                   {subProduct.packing && (
-                    <tr className="border-t">
+                    <tr>
                       <td className="px-5 py-3 text-gray-600">Packing</td>
                       <td className="px-5 py-3 font-medium">{subProduct.packing}</td>
                     </tr>
                   )}
                   {subProduct.material && (
-                    <tr className="border-t">
+                    <tr>
                       <td className="px-5 py-3 text-gray-600">Material</td>
                       <td className="px-5 py-3 font-medium">{subProduct.material}</td>
                     </tr>
                   )}
                   {subProduct.productSize && (
-                    <tr className="border-t">
+                    <tr>
                       <td className="px-5 py-3 text-gray-600">Size Options</td>
                       <td className="px-5 py-3 font-medium">{subProduct.productSize}</td>
                     </tr>
                   )}
                   {subProduct.productShape && (
-                    <tr className="border-t">
+                    <tr>
                       <td className="px-5 py-3 text-gray-600">Shape Options</td>
                       <td className="px-5 py-3 font-medium">{subProduct.productShape}</td>
                     </tr>
                   )}
                   {subProduct.minimumQuantity && subProduct.minimumQuantity > 0 && (
-                    <tr className="border-t">
+                    <tr>
                       <td className="px-5 py-3 text-gray-600">Minimum Quantity</td>
                       <td className="px-5 py-3 font-medium">{subProduct.minimumQuantity} pieces</td>
                     </tr>
@@ -317,7 +315,9 @@ export default function SubProductDetailPage() {
                     unoptimized
                   />
                   <button className="absolute top-3 right-3 text-gray-400 hover:text-[#7B00E0]">
-                    <Bookmark size={20} />
+                    <svg width="20" height="30" viewBox="0 0 27 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7.2002 2H19.7998C21.0932 2 21.942 2.00201 22.5908 2.05566C23.2148 2.10729 23.4753 2.19683 23.626 2.27441C24.0943 2.51594 24.4797 2.90335 24.7227 3.38574C24.8035 3.54642 24.8938 3.81945 24.9453 4.45703C24.9986 5.1173 25 5.97939 25 7.28711V37.2275L14.6191 30.2227C13.9854 29.795 13.1675 29.7685 12.5107 30.1426L12.3818 30.2227L2 37.2256V7.28711C2 5.97939 2.00139 5.1173 2.05469 4.45703C2.10616 3.81945 2.19648 3.54642 2.27734 3.38574C2.52027 2.90345 2.90482 2.51497 3.37305 2.27344C3.52364 2.19581 3.78469 2.10733 4.40918 2.05566C5.05802 2.00201 5.9068 2 7.2002 2Z" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </button>
                 </div>
                 <div className="p-4">
@@ -431,6 +431,193 @@ export default function SubProductDetailPage() {
               >
                 Confirm
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Filter Modal */}
+      {showFilterModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Filter Products"
+        >
+          <button
+            type="button"
+            aria-label="Close modal"
+            onClick={() => setShowFilterModal(false)}
+            className="absolute inset-0 bg-black/70"
+          />
+          <div className="relative w-[min(90vw,800px)] max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+              <h2
+                className="text-2xl font-semibold text-[#7B00E0]"
+                style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+              >
+                Filters
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowFilterModal(false)}
+                aria-label="Close"
+                className="text-gray-400 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-6 space-y-8">
+              {/* Size Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-[#7B00E0] mb-4" style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}>
+                  Size
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {["5\"", "6\"", "7\"", "8\"", "9\"", "10\"", "11\"", "12\""].map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFilters(prev => ({
+                          ...prev,
+                          size: prev.size.includes(size)
+                            ? prev.size.filter(s => s !== size)
+                            : [...prev.size, size]
+                        }))
+                      }}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                        selectedFilters.size.includes(size)
+                          ? "bg-[#7B00E0] text-white border-[#7B00E0]"
+                          : "bg-gray-100 text-black border-gray-300 hover:bg-gray-200"
+                      }`}
+                      style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Shape Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-[#7B00E0] mb-4" style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}>
+                  Shape
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {["Straight", "Curved", "Teeth", "Plain"].map((shape) => (
+                    <button
+                      key={shape}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFilters(prev => ({
+                          ...prev,
+                          shape: prev.shape.includes(shape)
+                            ? prev.shape.filter(s => s !== shape)
+                            : [...prev.shape, shape]
+                        }))
+                      }}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                        selectedFilters.shape.includes(shape)
+                          ? "bg-[#7B00E0] text-white border-[#7B00E0]"
+                          : "bg-gray-100 text-black border-gray-300 hover:bg-gray-200"
+                      }`}
+                      style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                    >
+                      {shape}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Therapeutic Category Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-[#7B00E0] mb-4" style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}>
+                  Therapeutic Category
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {["Cardiac", "Antibiotic", "Pain Relief", "Gastro", "Neuro", "Diabetic"].map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFilters(prev => ({
+                          ...prev,
+                          therapeuticCategory: prev.therapeuticCategory.includes(category)
+                            ? prev.therapeuticCategory.filter(c => c !== category)
+                            : [...prev.therapeuticCategory, category]
+                        }))
+                      }}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                        selectedFilters.therapeuticCategory.includes(category)
+                          ? "bg-[#7B00E0] text-white border-[#7B00E0]"
+                          : "bg-gray-100 text-black border-gray-300 hover:bg-gray-200"
+                      }`}
+                      style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dosage Form Section */}
+              <div>
+                <h3 className="text-lg font-semibold text-[#7B00E0] mb-4" style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}>
+                  Dosage Form
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {["Tablet", "Capsule", "Syrup", "Injection"].map((form) => (
+                    <button
+                      key={form}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFilters(prev => ({
+                          ...prev,
+                          dosageForm: prev.dosageForm.includes(form)
+                            ? prev.dosageForm.filter(f => f !== form)
+                            : [...prev.dosageForm, form]
+                        }))
+                      }}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                        selectedFilters.dosageForm.includes(form)
+                          ? "bg-[#7B00E0] text-white border-[#7B00E0]"
+                          : "bg-gray-100 text-black border-gray-300 hover:bg-gray-200"
+                      }`}
+                      style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                    >
+                      {form}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedFilters({
+                      size: [],
+                      shape: [],
+                      therapeuticCategory: [],
+                      dosageForm: []
+                    })
+                  }}
+                  className="flex-1 px-6 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                  style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                >
+                  Clear All
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowFilterModal(false)}
+                  className="flex-1 px-6 py-3 rounded-lg bg-[#7B00E0] text-white hover:bg-[#6a00c4] transition-colors"
+                  style={{ fontFamily: "var(--font-poppins), Poppins, sans-serif" }}
+                >
+                  Apply Filters
+                </button>
+              </div>
             </div>
           </div>
         </div>

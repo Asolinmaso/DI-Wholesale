@@ -34,19 +34,19 @@ export function ClientsPartners() {
   const duplicatedPartners = [...partners, ...partners, ...partners, ...partners]
 
   return (
-    <section id="clients-partners" className="py-16 md:py-24 bg-white">
+    <section id="clients-partners" className="py-16 md:py-16 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading */}
         <div className="mb-8 sm:mb-10 md:mb-12 lg:mb-16 flex justify-center px-4">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center">
-            <span className="text-gray-600">Our</span>{" "}
+            <span className="">Our</span>{" "}
             <span className="text-[#7B00E0] relative">
               Clients
               <span className="text-[#1E1E1E]"> & </span>
               Partners
               <span
-                className="absolute bottom-0 left-0 h-[3px] sm:h-[4px] md:h-[5px] bg-[#7B00E0]"
-                style={{ width: '100%' }}
+                className="absolute bottom-[-9px] sm:bottom-[-14px] left-[20%] h-[3px] sm:h-[4px] md:h-[5px] bg-[#7B00E0]"
+                style={{ width: '40%' }}
               />
             </span>
           </h2>

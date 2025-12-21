@@ -76,7 +76,7 @@ export function OrderFulfillment() {
             From <span className="text-[#7B00E0]">Product Discovery</span> to <span className="text-[#7B00E0] relative">
               Order Fulfillment
               <span
-                className="absolute bottom-0 left-0 h-[3px] sm:h-[4px] md:h-[5px] bg-[#7B00E0]"
+                className="absolute bottom-[-9px] sm:bottom-[-14px] left-0 h-[3px] sm:h-[4px] md:h-[5px] bg-[#7B00E0]"
                 style={{ width: '60%' }}
               />
             </span>
