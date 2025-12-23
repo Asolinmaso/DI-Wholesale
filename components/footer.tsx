@@ -502,11 +502,10 @@ export function Footer() {
               <li className="flex items-center gap-2">
                 <Phone className="h-5 w-5 text-white" />
                 <span 
-                  className="font-poppins text-white"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '12px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -517,11 +516,10 @@ export function Footer() {
               <li className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-white" />
                 <span 
-                  className="font-poppins text-white"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '12px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}
@@ -532,11 +530,10 @@ export function Footer() {
               <li className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-white" />
                 <span 
-                  className="font-poppins text-white"
+                  className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',
                     fontWeight: 400,
-                    fontSize: '12px',
                     lineHeight: '20px',
                     color: '#FFFFFF',
                   }}

@@ -66,7 +66,7 @@ const steps = [
 ]
 
 export function OrderFulfillment() {
-  const [activeStep, setActiveStep] = useState(0)
+  const [hoveredStep, setHoveredStep] = useState<number | null>(0)
   return (
     <section id="fulfillment" className="py-16 md:py-24 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -117,12 +117,12 @@ export function OrderFulfillment() {
             
             <div className="flex flex-col space-y-8 md:space-y-12">
               {steps.map((step, index) => {
-                const isActive = activeStep === index
+                const isActive = hoveredStep === index
                 return (
                   <div 
                     key={index} 
                     className="relative flex gap-6 cursor-pointer group"
-                    onClick={() => setActiveStep(index)}
+                    onMouseEnter={() => setHoveredStep(index)}
                   >
                     {/* Icon Container with Timeline Connection */}
                     <div className="flex-shrink-0 relative z-10">

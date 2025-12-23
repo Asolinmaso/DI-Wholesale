@@ -9,20 +9,37 @@ import { BulkProductsBanner } from "@/components/bulk-products-banner"
 import { FAQSection } from "@/components/faq-section"
 import { ContactUs } from "@/components/contact-us"
 import { Footer } from "@/components/footer"
+import { AnimateOnScroll } from "@/components/animate-on-scroll"
 
 export default function Home() {
   return (
     <main className="min-h-screen">
       <Navbar />
       <BannerSection />
-      <FeatureCards />
-      <AboutUs />
-      <OurProducts />
-      <ClientsPartners />
-      <OrderFulfillment />
-      <BulkProductsBanner />
-      <ContactUs />
-      <FAQSection />
+      <AnimateOnScroll animation="fadeInUp" delay={100}>
+        <FeatureCards />
+      </AnimateOnScroll>
+      <AnimateOnScroll animation="fadeInUp" delay={200}>
+        <AboutUs />
+      </AnimateOnScroll>
+      <AnimateOnScroll animation="fadeInUp" delay={100}>
+        <OurProducts />
+      </AnimateOnScroll>
+      <AnimateOnScroll animation="fadeInUp" delay={200}>
+        <ClientsPartners />
+      </AnimateOnScroll>
+      <AnimateOnScroll animation="fadeInUp" delay={100}>
+        <OrderFulfillment />
+      </AnimateOnScroll>
+      <AnimateOnScroll animation="fadeInUp" delay={200}>
+        <BulkProductsBanner />
+      </AnimateOnScroll>
+      <AnimateOnScroll animation="fadeInUp" delay={100}>
+        <ContactUs />
+      </AnimateOnScroll>
+      <AnimateOnScroll animation="fadeInUp" delay={200}>
+        <FAQSection />
+      </AnimateOnScroll>
       <Footer />
     </main>
   )

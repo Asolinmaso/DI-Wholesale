@@ -69,7 +69,16 @@ export default function SubProductDetailPage() {
   const { addToCart } = useCart()
 
   const handleAddToCart = async () => {
-    if (!selectedSize || !selectedShape || !subProduct || !product) {
+    const isMedicine = category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine")
+    
+    // For medicines, only quantity is required. For others, size and shape are required
+    if (!isMedicine && (!selectedSize || !selectedShape)) {
+      setShowSizeModal(true)
+      return
+    }
+    
+    // For medicines, show modal only if quantity needs to be set
+    if (isMedicine && quantity < minQuantity) {
       setShowSizeModal(true)
       return
     }
@@ -81,8 +90,8 @@ export default function SubProductDetailPage() {
         name: subProduct.name,
         image: subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : "",
         quantity,
-        size: selectedSize,
-        shape: selectedShape,
+        size: isMedicine ? "" : selectedSize,
+        shape: isMedicine ? "" : selectedShape,
       })
       setShowSizeModal(false)
       router.push("/cart")
@@ -219,24 +228,38 @@ export default function SubProductDetailPage() {
               </p>
             )}
 
-            {/* Size/Shape/Quantity Button */}
-            <button
-              onClick={handleSelectSizeShape}
-              className="w-full md:w-auto border border-gray-300 rounded-lg px-6 py-3 text-base flex items-center justify-between gap-4 mb-4 hover:border-[#7B00E0]"
-            >
-              <span>
-                {selectedSize && selectedShape 
-                  ? `Size: ${selectedSize}, Shape: ${selectedShape}` 
-                  : "Select Size, Shape & Quantity"
-                }
-              </span>
-              <svg width="20" height="12" viewBox="0 0 20 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0.825786 4.46821L8.03978 11.2358C8.29746 11.4781 8.60354 11.6703 8.94049 11.8014C9.27744 11.9325 9.63864 12 10.0034 12C10.3682 12 10.7294 11.9325 11.0664 11.8014C11.4033 11.6703 11.7094 11.4781 11.9671 11.2358L19.1811 4.46821C20.9358 2.82203 19.6824 0 17.2035 0H2.77551C0.296573 0 -0.92897 2.82203 0.825786 4.46821Z" fill="#8A8A8A"/>
-              </svg>
-            </button>
+            {/* Size/Shape/Quantity Button - Only show for non-medicines */}
+            {(() => {
+              const isMedicine = category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine")
+              if (isMedicine) return null
+              
+              return (
+                <button
+                  onClick={handleSelectSizeShape}
+                  className="w-full md:w-auto border border-gray-300 rounded-lg px-6 py-3 text-base flex items-center justify-between gap-4 mb-4 hover:border-[#7B00E0]"
+                >
+                  <span>
+                    {selectedSize && selectedShape 
+                      ? `Size: ${selectedSize}, Shape: ${selectedShape}` 
+                      : "Select Size, Shape & Quantity"
+                    }
+                  </span>
+                  <svg width="20" height="12" viewBox="0 0 20 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0.825786 4.46821L8.03978 11.2358C8.29746 11.4781 8.60354 11.6703 8.94049 11.8014C9.27744 11.9325 9.63864 12 10.0034 12C10.3682 12 10.7294 11.9325 11.0664 11.8014C11.4033 11.6703 11.7094 11.4781 11.9671 11.2358L19.1811 4.46821C20.9358 2.82203 19.6824 0 17.2035 0H2.77551C0.296573 0 -0.92897 2.82203 0.825786 4.46821Z" fill="#8A8A8A"/>
+                  </svg>
+                </button>
+              )
+            })()}
 
             <button
-              onClick={handleAddToCart}
+              onClick={() => {
+                const isMedicine = category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine")
+                if (isMedicine) {
+                  setShowSizeModal(true)
+                } else {
+                  handleAddToCart()
+                }
+              }}
               className="w-full bg-[#7B00E0] text-white px-12 py-4 rounded-lg font-semibold hover:bg-[#6a00c4] mb-8"
             >
               Add to Cart
@@ -356,82 +379,152 @@ export default function SubProductDetailPage() {
               <X size={32} />
             </button>
 
-            <h2 className="text-3xl font-bold mb-8">Size & Dimension</h2>
+            {(() => {
+              const isMedicine = category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine")
+              
+              // For medicines, only show quantity
+              if (isMedicine) {
+                return (
+                  <>
+                    <h2 className="text-3xl font-bold mb-8">Quantity</h2>
 
-            <div className="mb-8">
-              <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
-                {sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`px-4 py-3 rounded-xl border-2 text-lg font-medium transition-all ${
-                      selectedSize === size
-                        ? "border-[#7B00E0] bg-[#7B00E0] text-white"
-                        : "border-gray-300 hover:border-[#7B00E0]"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
+                    <div className="mb-6">
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={() => setQuantity((q) => Math.max(minQuantity, q - 1))}
+                          className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0]"
+                        >
+                          −
+                        </button>
+                        <input
+                          type="number"
+                          value={quantity}
+                          onChange={(e) => setQuantity(Math.max(minQuantity, parseInt(e.target.value) || minQuantity))}
+                          className="w-24 h-12 border-2 border-gray-300 rounded-lg text-center text-xl font-medium"
+                          min={minQuantity}
+                        />
+                        <button
+                          onClick={() => setQuantity((q) => q + 1)}
+                          className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0]"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <p className="text-gray-500 mt-3">Note : Minimum Quantity Should be {minQuantity} Strips/Bottles</p>
+                    </div>
 
-            <h2 className="text-3xl font-bold mb-6">Shape</h2>
+                    <div className="flex justify-end mt-8">
+                      <button
+                        onClick={async () => {
+                          if (!subProduct || !product) return
+                          try {
+                            await addToCart({
+                              productId: product._id,
+                              subProductId: subProduct._id,
+                              name: subProduct.name,
+                              image: subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : "",
+                              quantity,
+                              size: "",
+                              shape: "",
+                            })
+                            setShowSizeModal(false)
+                            router.push("/cart")
+                          } catch (error) {
+                            console.error("Failed to add to cart:", error)
+                            alert("Failed to add item to cart. Please try again.")
+                          }
+                        }}
+                        className="bg-[#7B00E0] text-white px-12 py-4 rounded-2xl text-lg font-semibold hover:bg-[#6a00c4]"
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
+                  </>
+                )
+              }
+              
+              // For non-medicines, show size, shape, and quantity
+              return (
+                <>
+                  <h2 className="text-3xl font-bold mb-8">Size & Dimension</h2>
 
-            <div className="mb-8">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {shapes.map((shape) => (
-                  <button
-                    key={shape}
-                    onClick={() => setSelectedShape(shape)}
-                    className={`px-6 py-3 rounded-xl border-2 text-lg font-medium transition-all ${
-                      selectedShape === shape
-                        ? "border-[#7B00E0] bg-[#7B00E0] text-white"
-                        : "border-gray-300 hover:border-[#7B00E0]"
-                    }`}
-                  >
-                    {shape}
-                  </button>
-                ))}
-              </div>
-            </div>
+                  <div className="mb-8">
+                    <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
+                      {sizes.map((size) => (
+                        <button
+                          key={size}
+                          onClick={() => setSelectedSize(size)}
+                          className={`px-4 py-3 rounded-xl border-2 text-lg font-medium transition-all ${
+                            selectedSize === size
+                              ? "border-[#7B00E0] bg-[#7B00E0] text-white"
+                              : "border-gray-300 hover:border-[#7B00E0]"
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-            <h2 className="text-3xl font-bold mb-6">Quantity</h2>
+                  <h2 className="text-3xl font-bold mb-6">Shape</h2>
 
-            <div className="mb-6">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setQuantity((q) => Math.max(minQuantity, q - 1))}
-                  className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0]"
-                >
-                  −
-                </button>
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Math.max(minQuantity, parseInt(e.target.value) || minQuantity))}
-                  className="w-24 h-12 border-2 border-gray-300 rounded-lg text-center text-xl font-medium"
-                  min={minQuantity}
-                />
-                <button
-                  onClick={() => setQuantity((q) => q + 1)}
-                  className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0]"
-                >
-                  +
-                </button>
-              </div>
-              <p className="text-gray-500 mt-3">Note : Minimum Quantity Should be {minQuantity} pcs</p>
-            </div>
+                  <div className="mb-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {shapes.map((shape) => (
+                        <button
+                          key={shape}
+                          onClick={() => setSelectedShape(shape)}
+                          className={`px-6 py-3 rounded-xl border-2 text-lg font-medium transition-all ${
+                            selectedShape === shape
+                              ? "border-[#7B00E0] bg-[#7B00E0] text-white"
+                              : "border-gray-300 hover:border-[#7B00E0]"
+                          }`}
+                        >
+                          {shape}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-            <div className="flex justify-end mt-8">
-              <button
-                onClick={handleConfirmSelection}
-                disabled={!selectedSize || !selectedShape}
-                className="bg-[#7B00E0] text-white px-12 py-4 rounded-2xl text-lg font-semibold hover:bg-[#6a00c4] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Confirm
-              </button>
-            </div>
+                  <h2 className="text-3xl font-bold mb-6">Quantity</h2>
+
+                  <div className="mb-6">
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => setQuantity((q) => Math.max(minQuantity, q - 1))}
+                        className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0]"
+                      >
+                        −
+                      </button>
+                      <input
+                        type="number"
+                        value={quantity}
+                        onChange={(e) => setQuantity(Math.max(minQuantity, parseInt(e.target.value) || minQuantity))}
+                        className="w-24 h-12 border-2 border-gray-300 rounded-lg text-center text-xl font-medium"
+                        min={minQuantity}
+                      />
+                      <button
+                        onClick={() => setQuantity((q) => q + 1)}
+                        className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0]"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <p className="text-gray-500 mt-3">Note : Minimum Quantity Should be {minQuantity} pcs</p>
+                  </div>
+
+                  <div className="flex justify-end mt-8">
+                    <button
+                      onClick={handleConfirmSelection}
+                      disabled={!selectedSize || !selectedShape}
+                      className="bg-[#7B00E0] text-white px-12 py-4 rounded-2xl text-lg font-semibold hover:bg-[#6a00c4] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Confirm
+                    </button>
+                  </div>
+                </>
+              )
+            })()}
           </div>
         </div>
       )}

@@ -13,17 +13,106 @@ export function ContactUs() {
     message: "",
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle form submission here
-    console.log("Form submitted:", formData)
+  const [errors, setErrors] = useState({
+    name: "",
+    contact: "",
+    email: "",
+    location: "",
+    message: "",
+  })
+
+  const validateField = (name: string, value: string) => {
+    let error = ""
+    
+    switch (name) {
+      case "name":
+        if (!value.trim()) {
+          error = "Name is required"
+        } else if (value.trim().length < 2) {
+          error = "Name must be at least 2 characters"
+        }
+        break
+      case "contact":
+        if (!value.trim()) {
+          error = "Contact number is required"
+        } else if (!/^\d{10}$/.test(value.trim())) {
+          error = "Please enter a valid 10-digit contact number"
+        }
+        break
+      case "email":
+        if (!value.trim()) {
+          error = "Email is required"
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+          error = "Please enter a valid email address"
+        }
+        break
+      case "location":
+        if (!value.trim()) {
+          error = "Location is required"
+        } else if (value.trim().length < 3) {
+          error = "Location must be at least 3 characters"
+        }
+        break
+      case "message":
+        if (!value.trim()) {
+          error = "Message is required"
+        } else if (value.trim().length < 10) {
+          error = "Message must be at least 10 characters"
+        }
+        break
+    }
+    
+    return error
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     })
+    
+    // Clear error when user starts typing
+    if (errors[name as keyof typeof errors]) {
+      setErrors({
+        ...errors,
+        [name]: "",
+      })
+    }
+  }
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    const error = validateField(name, value)
+    setErrors({
+      ...errors,
+      [name]: error,
+    })
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Validate all fields
+    const newErrors = {
+      name: validateField("name", formData.name),
+      contact: validateField("contact", formData.contact),
+      email: validateField("email", formData.email),
+      location: validateField("location", formData.location),
+      message: validateField("message", formData.message),
+    }
+    
+    setErrors(newErrors)
+    
+    // Check if there are any errors
+    const hasErrors = Object.values(newErrors).some(error => error !== "")
+    
+    if (!hasErrors) {
+      // Handle form submission here
+      console.log("Form submitted:", formData)
+      // You can add success message or API call here
+      alert("Form submitted successfully! We will get back to you soon.")
+    }
   }
 
   return (
@@ -63,75 +152,116 @@ export function ContactUs() {
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5 md:gap-6">
                 {/* Name Field */}
-                <div className="flex items-center px-4 py-[10px] border border-[#A5A5A5] rounded-lg">
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full outline-none text-base leading-6 placeholder:text-[#A5A5A5] text-black"
-                    style={{ fontFamily: 'Poppins, sans-serif' }}
-                  />
+                <div>
+                  <div className={`flex items-center px-4 py-[10px] border rounded-lg ${
+                    errors.name ? "border-red-500" : "border-[#A5A5A5]"
+                  }`}>
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className="w-full outline-none text-base leading-6 placeholder:text-[#A5A5A5] text-black"
+                      style={{ fontFamily: 'Poppins, sans-serif' }}
+                    />
+                  </div>
+                  {errors.name && (
+                    <p className="text-red-500 text-sm mt-1 px-1">{errors.name}</p>
+                  )}
                 </div>
 
                 {/* Contact Field with Country Code */}
-                <div className="flex items-center px-4 py-[10px] border border-[#A5A5A5] rounded-lg gap-[10px]">
-                  <div className="flex items-center gap-[10px]">
-                    <span className="text-base leading-5 text-[#A5A5A5]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                      {formData.countryCode}
-                    </span>
-                    <ChevronDown className="w-[10px] h-[5px] text-[#A5A5A5]" />
-                    <div className="w-[1px] h-[44px] bg-[#A5A5A5]" />
+                <div>
+                  <div className={`flex items-center px-4 py-[10px] border rounded-lg gap-[10px] ${
+                    errors.contact ? "border-red-500" : "border-[#A5A5A5]"
+                  }`}>
+                    <div className="flex items-center gap-[10px]">
+                      <span className="text-base leading-5 text-[#A5A5A5]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                        {formData.countryCode}
+                      </span>
+                      <ChevronDown className="w-[10px] h-[5px] text-[#A5A5A5]" />
+                      <div className="w-[1px] h-[44px] bg-[#A5A5A5]" />
+                    </div>
+                    <input
+                      type="tel"
+                      name="contact"
+                      placeholder="Contact"
+                      value={formData.contact}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      maxLength={10}
+                      className="flex-1 outline-none text-base leading-6 placeholder:text-[#A5A5A5] text-black"
+                      style={{ fontFamily: 'Poppins, sans-serif' }}
+                    />
                   </div>
-                  <input
-                    type="tel"
-                    name="contact"
-                    placeholder="Contact"
-                    value={formData.contact}
-                    onChange={handleChange}
-                    className="flex-1 outline-none text-base leading-6 placeholder:text-[#A5A5A5] text-black"
-                    style={{ fontFamily: 'Poppins, sans-serif' }}
-                  />
+                  {errors.contact && (
+                    <p className="text-red-500 text-sm mt-1 px-1">{errors.contact}</p>
+                  )}
                 </div>
 
                 {/* Email Field */}
-                <div className="flex items-center px-4 py-[10px] border border-[#A5A5A5] rounded-lg">
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="E-mail"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full outline-none text-base leading-6 placeholder:text-[#A5A5A5] text-black"
-                    style={{ fontFamily: 'Poppins, sans-serif' }}
-                  />
+                <div>
+                  <div className={`flex items-center px-4 py-[10px] border rounded-lg ${
+                    errors.email ? "border-red-500" : "border-[#A5A5A5]"
+                  }`}>
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="E-mail"
+                      value={formData.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className="w-full outline-none text-base leading-6 placeholder:text-[#A5A5A5] text-black"
+                      style={{ fontFamily: 'Poppins, sans-serif' }}
+                    />
+                  </div>
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1 px-1">{errors.email}</p>
+                  )}
                 </div>
 
                 {/* Location Field */}
-                <div className="flex items-center px-4 py-[10px] border border-[#A5A5A5] rounded-lg">
-                  <input
-                    type="text"
-                    name="location"
-                    placeholder="Location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    className="w-full outline-none text-base leading-6 placeholder:text-[#A5A5A5] text-black"
-                    style={{ fontFamily: 'Poppins, sans-serif' }}
-                  />
+                <div>
+                  <div className={`flex items-center px-4 py-[10px] border rounded-lg ${
+                    errors.location ? "border-red-500" : "border-[#A5A5A5]"
+                  }`}>
+                    <input
+                      type="text"
+                      name="location"
+                      placeholder="Location"
+                      value={formData.location}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className="w-full outline-none text-base leading-6 placeholder:text-[#A5A5A5] text-black"
+                      style={{ fontFamily: 'Poppins, sans-serif' }}
+                    />
+                  </div>
+                  {errors.location && (
+                    <p className="text-red-500 text-sm mt-1 px-1">{errors.location}</p>
+                  )}
                 </div>
 
                 {/* Message Field */}
-                <div className="flex items-start px-4 py-[10px] border border-[#A5A5A5] rounded-lg min-h-[110px]">
-                  <textarea
-                    name="message"
-                    placeholder="Message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    rows={4}
-                    className="w-full outline-none text-base leading-6 placeholder:text-[#A5A5A5] text-black resize-none"
-                    style={{ fontFamily: 'Poppins, sans-serif' }}
-                  />
+                <div>
+                  <div className={`flex items-start px-4 py-[10px] border rounded-lg min-h-[110px] ${
+                    errors.message ? "border-red-500" : "border-[#A5A5A5]"
+                  }`}>
+                    <textarea
+                      name="message"
+                      placeholder="Message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      rows={4}
+                      className="w-full outline-none text-base leading-6 placeholder:text-[#A5A5A5] text-black resize-none"
+                      style={{ fontFamily: 'Poppins, sans-serif' }}
+                    />
+                  </div>
+                  {errors.message && (
+                    <p className="text-red-500 text-sm mt-1 px-1">{errors.message}</p>
+                  )}
                 </div>
 
                 {/* Submit Button */}

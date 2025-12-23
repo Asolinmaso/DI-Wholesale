@@ -73,7 +73,6 @@ export default function AdminPage() {
   const [variantShape, setVariantShape] = useState("")
   const [variantMaterial, setVariantMaterial] = useState("")
   const [variantComposition, setVariantComposition] = useState("")
-  const [variantPacking, setVariantPacking] = useState("")
   const [editingVariantId, setEditingVariantId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -205,7 +204,15 @@ export default function AdminPage() {
 
   async function handleCreateOrUpdateVariant(e: React.FormEvent) {
     e.preventDefault()
-    if (!variantSubCatId || !variantName || !variantCatId) return
+    const selectedCategory = categories.find(c => c._id === variantCatId)
+    const isMedicine = selectedCategory?.name?.toLowerCase().includes("medicine") || selectedCategory?.slug?.toLowerCase().includes("medicine")
+    
+    // For medicines, subcategory is not required
+    if (isMedicine) {
+      if (!variantName || !variantCatId) return
+    } else {
+      if (!variantSubCatId || !variantName || !variantCatId) return
+    }
     setLoading(true)
     setError("")
     try {
@@ -217,11 +224,42 @@ export default function AdminPage() {
       form.append("material", variantMaterial || "")
       form.append("description", variantDesc || "")
       form.append("composition", variantComposition || "")
-      form.append("packing", variantPacking || "")
       if (variantImages) Array.from(variantImages).forEach((f) => form.append("images", f))
 
-      if (editingVariantId) await updateSubProduct(variantSubCatId, editingVariantId, form)
-      else await createSubProduct(variantSubCatId, form)
+      const selectedCategory = categories.find(c => c._id === variantCatId)
+      const isMedicine = selectedCategory?.name?.toLowerCase().includes("medicine") || selectedCategory?.slug?.toLowerCase().includes("medicine")
+      
+      // For medicines, subcategory is not required in the UI, but API still needs it
+      // If no subcategory selected for medicines, automatically create a default one
+      let subCatIdToUse = variantSubCatId
+      
+      if (isMedicine && !subCatIdToUse) {
+        // Try to find the first subcategory for this medicine category
+        const firstSubCat = subCategories.find(p => p.categoryId === variantCatId)
+        if (firstSubCat) {
+          subCatIdToUse = firstSubCat._id
+        } else {
+          // Automatically create a default subcategory for medicines
+          try {
+            const defaultSubCatForm = new FormData()
+            defaultSubCatForm.append("name", "General Medicines")
+            defaultSubCatForm.append("categoryId", variantCatId)
+            const newSubCat = await createProduct(defaultSubCatForm)
+            subCatIdToUse = newSubCat._id
+            // Refresh subcategories list
+            await fetchSubCategories(variantCatId)
+          } catch (err) {
+            throw new Error("Failed to create default subcategory. Please create a subcategory manually first.")
+          }
+        }
+      }
+      
+      if (!subCatIdToUse) {
+        throw new Error("Sub-Category is required")
+      }
+      
+      if (editingVariantId) await updateSubProduct(subCatIdToUse, editingVariantId, form)
+      else await createSubProduct(subCatIdToUse, form)
 
       setVariantName("")
       setVariantCatId("")
@@ -233,7 +271,6 @@ export default function AdminPage() {
       setVariantShape("")
       setVariantMaterial("")
       setVariantComposition("")
-      setVariantPacking("")
       setEditingVariantId(null)
       if (variantSubCatId) fetchVariants(variantSubCatId)
     } catch (err: unknown) {
@@ -253,7 +290,6 @@ export default function AdminPage() {
     setVariantShape(v.productShape || "")
     setVariantMaterial(v.material || "")
     setVariantComposition(v.composition || "")
-    setVariantPacking(v.packing || "")
     
     // Find the product to get categoryId
     const prod = subCategories.find((p) => p._id === v.productId)
@@ -341,7 +377,7 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Category Images :</label>
-                    <div className="flex items-center gap-3">
+                    <div className="border border-gray-300 rounded-lg bg-gray-50 flex items-center overflow-hidden">
                       <input
                         type="file"
                         accept="image/*"
@@ -350,11 +386,14 @@ export default function AdminPage() {
                         className="hidden"
                         id="cat-image-upload"
                       />
-                      <label htmlFor="cat-image-upload" className="border rounded-lg px-4 py-2.5 cursor-pointer hover:bg-gray-50 flex items-center gap-2 text-[#7B00E0] font-medium">
-                        <span>↑ Upload Files</span>
+                      <label htmlFor="cat-image-upload" className="bg-gray-200 rounded-lg px-4 py-2.5 cursor-pointer hover:bg-gray-300 transition-colors flex items-center gap-2 text-gray-700 font-medium flex-shrink-0">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M8 2V10M4 6L8 2L12 6M2 13H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span>Upload File</span>
                       </label>
-                      <span className="text-gray-400 text-sm">
-                        {catImages && catImages.length > 0 ? `${catImages.length} file(s) chosen` : "No files Chosen"}
+                      <span className="text-gray-400 text-sm px-4 flex-1">
+                        {catImages && catImages.length > 0 ? `${catImages.length} file(s) chosen` : "No file Chosen"}
                       </span>
                     </div>
                   </div>
@@ -364,7 +403,6 @@ export default function AdminPage() {
                       disabled={loading}
                       className="bg-[#7B00E0] text-white px-6 py-3 rounded-lg font-medium disabled:opacity-50 inline-flex items-center gap-2"
                     >
-                      <Plus size={18} />
                       {editingCatId ? "Update Category" : "Add Category"}
                     </button>
                     {editingCatId && (
@@ -479,7 +517,7 @@ export default function AdminPage() {
                       disabled={loading}
                       className="bg-[#7B00E0] text-white px-6 py-3 rounded-lg font-medium disabled:opacity-50 inline-flex items-center gap-2"
                     >
-                      <Plus size={18} />
+                     
                       {editingSubCatId ? "Update Sub-Category" : "Add Sub-Category"}
                     </button>
                     {editingSubCatId && (
@@ -572,7 +610,7 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Product Image :</label>
-                    <div className="flex items-center gap-3">
+                    <div className="border border-gray-300 rounded-lg bg-gray-50 flex items-center overflow-hidden">
                       <input
                         type="file"
                         accept="image/*"
@@ -581,54 +619,47 @@ export default function AdminPage() {
                         className="hidden"
                         id="variant-image-upload"
                       />
-                      <label htmlFor="variant-image-upload" className="border rounded-lg px-4 py-2.5 cursor-pointer hover:bg-gray-50 flex items-center gap-2 text-[#7B00E0] font-medium">
-                        <span>↑ Upload Files</span>
+                      <label htmlFor="variant-image-upload" className="bg-gray-200 rounded-lg px-4 py-2.5 cursor-pointer hover:bg-gray-300 transition-colors flex items-center gap-2 text-gray-700 font-medium flex-shrink-0">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M8 2V10M4 6L8 2L12 6M2 13H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span>Upload File</span>
                       </label>
-                      <span className="text-gray-400 text-sm">
+                      <span className="text-gray-400 text-sm px-4 flex-1">
                         {variantImages && variantImages.length > 0 ? `${variantImages.length} file(s) chosen` : "No file Chosen"}
                       </span>
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Select Sub-Category :</label>
-                    <CustomSelect
-                      value={variantSubCatId}
-                      onChange={(e) => setVariantSubCatId(e.target.value)}
-                      required
-                      disabled={!variantCatId}
-                    >
-                      <option value="">Select Sub-Category</option>
-                      {subCategories
-                        .filter((p) => !variantCatId || p.categoryId === variantCatId)
-                        .map((p) => (
-                          <option key={p._id} value={p._id}>
-                            {p.name}
-                          </option>
-                        ))}
-                    </CustomSelect>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Size :</label>
-                    <input
-                      type="text"
-                      value={variantSize}
-                      onChange={(e) => setVariantSize(e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2"
-                      placeholder="Enter Available Sizes (e.g., 5&quot;, 6&quot;, 7&quot;, 8&quot;)"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Separate multiple sizes with commas</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Shape :</label>
-                    <input
-                      type="text"
-                      value={variantShape}
-                      onChange={(e) => setVariantShape(e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2"
-                      placeholder="Enter Available Shapes (e.g., Straight, Curved, Teeth)"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Separate multiple shapes with commas</p>
-                  </div>
+                  {(() => {
+                    const selectedCategory = categories.find(c => c._id === variantCatId)
+                    const isMedicine = selectedCategory?.name?.toLowerCase().includes("medicine") || selectedCategory?.slug?.toLowerCase().includes("medicine")
+                    
+                    // Hide Sub-Category field for medicines
+                    if (!isMedicine) {
+                      return (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Select Sub-Category :</label>
+                          <CustomSelect
+                            value={variantSubCatId}
+                            onChange={(e) => setVariantSubCatId(e.target.value)}
+                            required
+                            disabled={!variantCatId}
+                          >
+                            <option value="">Select Sub-Category</option>
+                            {subCategories
+                              .filter((p) => !variantCatId || p.categoryId === variantCatId)
+                              .map((p) => (
+                                <option key={p._id} value={p._id}>
+                                  {p.name}
+                                </option>
+                              ))}
+                          </CustomSelect>
+                        </div>
+                      )
+                    }
+                    return null
+                  })()}
+                  {/* Minimum Quantity - shown for all categories */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Quantity :</label>
                     <input
@@ -640,53 +671,74 @@ export default function AdminPage() {
                       min={0}
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Material :</label>
-                    <input
-                      type="text"
-                      value={variantMaterial}
-                      onChange={(e) => setVariantMaterial(e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2"
-                      placeholder="Enter Material"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description :</label>
-                    <textarea
-                      value={variantDesc}
-                      onChange={(e) => setVariantDesc(e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2"
-                      rows={3}
-                      placeholder="Enter Description"
-                    />
-                  </div>
+                  
                   {/* Medicine-specific fields */}
                   {(() => {
                     const selectedCategory = categories.find(c => c._id === variantCatId)
                     const isMedicine = selectedCategory?.name?.toLowerCase().includes("medicine") || selectedCategory?.slug?.toLowerCase().includes("medicine")
+                    
+                    // Hide these fields for medicines category
+                    if (!isMedicine) {
+                      return (
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Product Size :</label>
+                            <input
+                              type="text"
+                              value={variantSize}
+                              onChange={(e) => setVariantSize(e.target.value)}
+                              className="w-full border rounded-lg px-3 py-2"
+                              placeholder="Enter Available Sizes (e.g., 5&quot;, 6&quot;, 7&quot;, 8&quot;)"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Separate multiple sizes with commas</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Product Shape :</label>
+                            <input
+                              type="text"
+                              value={variantShape}
+                              onChange={(e) => setVariantShape(e.target.value)}
+                              className="w-full border rounded-lg px-3 py-2"
+                              placeholder="Enter Available Shapes (e.g., Straight, Curved, Teeth)"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Separate multiple shapes with commas</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Material :</label>
+                            <input
+                              type="text"
+                              value={variantMaterial}
+                              onChange={(e) => setVariantMaterial(e.target.value)}
+                              className="w-full border rounded-lg px-3 py-2"
+                              placeholder="Enter Material"
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Description :</label>
+                            <textarea
+                              value={variantDesc}
+                              onChange={(e) => setVariantDesc(e.target.value)}
+                              className="w-full border rounded-lg px-3 py-2"
+                              rows={3}
+                              placeholder="Enter Description"
+                            />
+                          </div>
+                        </>
+                      )
+                    }
+                    
+                    // Show medicine-specific fields
                     return isMedicine ? (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Composition :</label>
-                          <input
-                            type="text"
-                            value={variantComposition}
-                            onChange={(e) => setVariantComposition(e.target.value)}
-                            className="w-full border rounded-lg px-3 py-2"
-                            placeholder="Enter Composition (e.g., Aceclofenac 100 mg)"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Packing :</label>
-                          <input
-                            type="text"
-                            value={variantPacking}
-                            onChange={(e) => setVariantPacking(e.target.value)}
-                            className="w-full border rounded-lg px-3 py-2"
-                            placeholder="Enter Packing (e.g., 10's, 100ml)"
-                          />
-                        </div>
-                      </>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Composition :</label>
+                        <input
+                          type="text"
+                          value={variantComposition}
+                          onChange={(e) => setVariantComposition(e.target.value)}
+                          className="w-full border rounded-lg px-3 py-2"
+                          placeholder="Enter Composition (e.g., Aceclofenac 100 mg)"
+                        />
+                      </div>
                     ) : null
                   })()}
                   <div className="md:col-span-2">
@@ -695,7 +747,7 @@ export default function AdminPage() {
                       disabled={loading}
                       className="bg-[#7B00E0] text-white px-6 py-3 rounded-lg font-medium disabled:opacity-50 inline-flex items-center gap-2"
                     >
-                      <Plus size={18} />
+                     
                       {editingVariantId ? "Update Product" : "Add Product"}
                     </button>
                     {editingVariantId && (
@@ -714,7 +766,6 @@ export default function AdminPage() {
                           setVariantShape("")
                           setVariantMaterial("")
                           setVariantComposition("")
-                          setVariantPacking("")
                         }}
                       >
                         Cancel

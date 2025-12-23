@@ -1,5 +1,7 @@
 "use client"
 
+import { AnimateOnScroll } from "@/components/animate-on-scroll"
+
 const TrashIcon = () => (
   <svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
     <g clipPath="url(#clip0_26_89)">
@@ -56,24 +58,30 @@ export function FeatureCards() {
         {features.map((feature, index) => {
           const Icon = feature.icon
           return (
-            <div
+            <AnimateOnScroll
               key={index}
-              className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-300 hover:shadow-xl transition-shadow"
+              animation="scaleIn"
+              delay={index * 150}
+              duration={0.5}
             >
-              <div className="flex flex-col items-center text-center">
-                <div className="mb-4">
-                  <div className="h-12 w-12 md:h-16 md:w-16 flex items-center justify-center">
-                    <Icon />
+              <div
+                className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-300 hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+              >
+                <div className="flex flex-col items-center text-center">
+                  <div className="mb-4">
+                    <div className="h-12 w-12 md:h-16 md:w-16 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                      <Icon />
+                    </div>
                   </div>
+                  <h3 className="text-xl md:text-2xl font-bold mb-3 transition-colors duration-300" style={{ color: feature.color }}>
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm md:text-lg">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="text-xl md:text-2xl font-bold mb-3" style={{ color: feature.color }}>
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 text-sm md:text-lg">
-                  {feature.description}
-                </p>
               </div>
-            </div>
+            </AnimateOnScroll>
           )
         })}
       </div>
