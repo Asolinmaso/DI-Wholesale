@@ -69,20 +69,22 @@ export default function SubProductDetailPage() {
   const { addToCart } = useCart()
 
   const handleAddToCart = async () => {
+    if (!product || !subProduct) return
+
     const isMedicine = category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine")
-    
+
     // For medicines, only quantity is required. For others, size and shape are required
     if (!isMedicine && (!selectedSize || !selectedShape)) {
       setShowSizeModal(true)
       return
     }
-    
+
     // For medicines, show modal only if quantity needs to be set
     if (isMedicine && quantity < minQuantity) {
       setShowSizeModal(true)
       return
     }
-    
+
     try {
       await addToCart({
         productId: product._id,

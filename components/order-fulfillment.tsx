@@ -119,23 +119,23 @@ export function OrderFulfillment() {
               {steps.map((step, index) => {
                 const isActive = hoveredStep === index
                 return (
-                  <div 
-                    key={index} 
-                    className="relative flex gap-6 cursor-pointer group"
+                  <div
+                    key={index}
+                    className="relative flex gap-6 cursor-pointer group hover:scale-[1.02] transition-all duration-300"
                     onMouseEnter={() => setHoveredStep(index)}
                   >
                     {/* Icon Container with Timeline Connection */}
                     <div className="flex-shrink-0 relative z-10">
                       {isActive ? (
                         // Active step - Purple circle with white icon
-                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#7B00E0] flex items-center justify-center shadow-lg transition-all duration-300">
+                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#7B00E0] flex items-center justify-center shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:scale-110">
                           <div className="text-white">
                             {step.icon}
                           </div>
                         </div>
                       ) : (
                         // Inactive step - White circle with grey icon
-                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shadow-sm transition-all duration-300 group-hover:border-[#7B00E0] group-hover:shadow-md">
+                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shadow-sm transition-all duration-300 group-hover:border-[#7B00E0] group-hover:shadow-lg group-hover:scale-110 group-hover:-translate-y-1">
                           <div className="text-gray-400 group-hover:text-[#7B00E0] transition-colors duration-300">
                             {step.icon}
                           </div>

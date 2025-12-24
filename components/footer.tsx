@@ -514,8 +514,8 @@ export function Footer() {
                 </span>
               </li>
               <li className="flex items-center gap-2">
-                <Mail className="h-5 w-5 text-white" />
-                <span 
+                <span className="text-white text-lg">📧</span>
+                <span
                   className="font-poppins text-white hover:text-white/80 transition-colors text-xs sm:text-sm md:text-base"
                   style={{
                     fontFamily: 'var(--font-poppins), sans-serif',

@@ -100,9 +100,13 @@ export function FAQSection() {
                   </div>
 
                   {/* Answer */}
-                  {isOpen && faq.answer && (
+                  <div
+                    className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                      isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    }`}
+                  >
                     <p
-                      className="font-poppins text-sm sm:text-base text-[#1E1E1E] mt-1 sm:mt-2"
+                      className="font-poppins text-sm sm:text-base text-[#1E1E1E] pt-2 sm:pt-3 pb-1"
                       style={{
                         fontFamily: 'var(--font-poppins), sans-serif',
                         fontWeight: 400,
@@ -112,7 +116,7 @@ export function FAQSection() {
                     >
                       {faq.answer}
                     </p>
-                  )}
+                  </div>
                 </div>
               </div>
             )
