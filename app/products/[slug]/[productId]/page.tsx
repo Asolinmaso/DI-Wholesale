@@ -157,7 +157,7 @@ export default function SubProductsListPage() {
               >
                 <div className="relative w-full h-[260px] bg-gray-50">
                   <Image
-                    src={subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : "/our_products/Surgical_Instruments.jpg"}
+                    src={subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : "/Logo2.png"}
                     alt={subProduct.name}
                     fill
                     className="object-contain p-6"

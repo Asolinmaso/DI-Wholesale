@@ -110,7 +110,7 @@ export default function CategoryProductsPage() {
               >
                 <div className="relative w-full h-[160px] md:h-[200px] bg-gray-100">
                   <Image
-                    src={product.images?.[0] ? mediaUrl(product.images[0]) : "/our_products/Surgical_Instruments.jpg"}
+                    src={product.images?.[0] ? mediaUrl(product.images[0]) : "/Logo2.png"}
                     alt={product.name}
                     fill
                     className="object-contain p-4"

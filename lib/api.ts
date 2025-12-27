@@ -147,4 +147,32 @@ export async function deleteSubProduct(productId: string, subId: string): Promis
   await fetchJson(apiUrl(`/api/products/${productId}/sub-products/${subId}`), { method: "DELETE" })
 }
 
+// Auth functions
+export async function sendOTP(email: string): Promise<{ message: string; otp?: string }> {
+  const res = await fetchJson<{ message: string; otp?: string }>(apiUrl("/api/auth/send-otp"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  })
+  return res
+}
+
+export async function verifyOTP(email: string, otp: string): Promise<{ token: string; email: string }> {
+  const res = await fetchJson<{ token: string; email: string }>(apiUrl("/api/auth/verify-otp"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, otp }),
+  })
+  return res
+}
+
+export async function verifyToken(token: string): Promise<{ valid: boolean; email: string }> {
+  const res = await fetchJson<{ valid: boolean; email: string }>(apiUrl("/api/auth/verify-token"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+  })
+  return res
+}
+
 

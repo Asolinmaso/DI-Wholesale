@@ -186,7 +186,7 @@ export default function SubProductDetailPage() {
           <div className="bg-gray-50 rounded-2xl p-8 flex flex-col items-center justify-center gap-4">
             <div className="relative w-full h-[350px]">
               <Image
-                src={subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : "/our_products/Surgical_Instruments.jpg"}
+                src={subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : "/Logo2.png"}
                 alt={subProduct.name}
                 fill
                 className="object-contain"

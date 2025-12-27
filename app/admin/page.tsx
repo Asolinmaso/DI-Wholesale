@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Plus, Trash2, Package, FolderOpen, Pencil } from "lucide-react"
 
 // Custom Select Component with custom arrow
@@ -37,12 +38,16 @@ import {
   updateSubProduct,
   deleteSubProduct,
   mediaUrl,
+  verifyToken,
   Category,
   Product,
   SubProduct,
 } from "@/lib/api"
 
 export default function AdminPage() {
+  const router = useRouter()
+  const [authenticated, setAuthenticated] = useState(false)
+  const [checkingAuth, setCheckingAuth] = useState(true)
   const [tab, setTab] = useState<"categories" | "sub-categories" | "products">("categories")
   const [categories, setCategories] = useState<Category[]>([])
   const [subCategories, setSubCategories] = useState<Product[]>([])
@@ -76,24 +81,53 @@ export default function AdminPage() {
   const [editingVariantId, setEditingVariantId] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchCategories()
-    fetchSubCategories()
-  }, [])
+    // Check authentication
+    const token = localStorage.getItem("admin_token")
+    if (!token) {
+      router.push("/admin/login")
+      return
+    }
+    verifyToken(token)
+      .then(() => {
+        setAuthenticated(true)
+        setCheckingAuth(false)
+        fetchCategories()
+        fetchSubCategories()
+      })
+      .catch(() => {
+        localStorage.removeItem("admin_token")
+        localStorage.removeItem("admin_email")
+        router.push("/admin/login")
+      })
+  }, [router])
 
   useEffect(() => {
-    fetchSubCategories(selectedCategory || undefined)
-  }, [selectedCategory])
+    if (authenticated) {
+      fetchSubCategories(selectedCategory || undefined)
+    }
+  }, [selectedCategory, authenticated])
 
   useEffect(() => {
-    if (selectedSubCategory) fetchVariants(selectedSubCategory)
-    else setVariants([])
-  }, [selectedSubCategory])
+    if (authenticated && selectedSubCategory) {
+      fetchVariants(selectedSubCategory)
+    } else if (authenticated) {
+      setVariants([])
+    }
+  }, [selectedSubCategory, authenticated])
 
   useEffect(() => {
-    if (variantCatId) {
+    if (authenticated && variantCatId) {
       fetchSubCategories(variantCatId)
     }
-  }, [variantCatId])
+  }, [variantCatId, authenticated])
+
+  if (checkingAuth || !authenticated) {
+    return (
+      <div className="min-h-screen bg-[#F7F7F7] flex items-center justify-center">
+        <div className="text-gray-500">Checking authentication...</div>
+      </div>
+    )
+  }
 
   async function fetchCategories() {
     try {
@@ -204,15 +238,8 @@ export default function AdminPage() {
 
   async function handleCreateOrUpdateVariant(e: React.FormEvent) {
     e.preventDefault()
-    const selectedCategory = categories.find(c => c._id === variantCatId)
-    const isMedicine = selectedCategory?.name?.toLowerCase().includes("medicine") || selectedCategory?.slug?.toLowerCase().includes("medicine")
+    if (!variantName || !variantCatId) return
     
-    // For medicines, subcategory is not required
-    if (isMedicine) {
-      if (!variantName || !variantCatId) return
-    } else {
-      if (!variantSubCatId || !variantName || !variantCatId) return
-    }
     setLoading(true)
     setError("")
     try {
@@ -226,23 +253,19 @@ export default function AdminPage() {
       form.append("composition", variantComposition || "")
       if (variantImages) Array.from(variantImages).forEach((f) => form.append("images", f))
 
-      const selectedCategory = categories.find(c => c._id === variantCatId)
-      const isMedicine = selectedCategory?.name?.toLowerCase().includes("medicine") || selectedCategory?.slug?.toLowerCase().includes("medicine")
-      
-      // For medicines, subcategory is not required in the UI, but API still needs it
-      // If no subcategory selected for medicines, automatically create a default one
+      // Subcategory is optional - if not provided, create or use a default one
       let subCatIdToUse = variantSubCatId
       
-      if (isMedicine && !subCatIdToUse) {
-        // Try to find the first subcategory for this medicine category
+      if (!subCatIdToUse) {
+        // Try to find the first subcategory for this category
         const firstSubCat = subCategories.find(p => p.categoryId === variantCatId)
         if (firstSubCat) {
           subCatIdToUse = firstSubCat._id
         } else {
-          // Automatically create a default subcategory for medicines
+          // Automatically create a default subcategory
           try {
             const defaultSubCatForm = new FormData()
-            defaultSubCatForm.append("name", "General Medicines")
+            defaultSubCatForm.append("name", "General")
             defaultSubCatForm.append("categoryId", variantCatId)
             const newSubCat = await createProduct(defaultSubCatForm)
             subCatIdToUse = newSubCat._id
@@ -252,10 +275,6 @@ export default function AdminPage() {
             throw new Error("Failed to create default subcategory. Please create a subcategory manually first.")
           }
         }
-      }
-      
-      if (!subCatIdToUse) {
-        throw new Error("Sub-Category is required")
       }
       
       if (editingVariantId) await updateSubProduct(subCatIdToUse, editingVariantId, form)
@@ -348,7 +367,17 @@ export default function AdminPage() {
       <div className="flex-1">
         <header className="h-[88px] bg-[#7B00E0] text-white flex items-center px-10">
           <h1 className="text-3xl font-medium">Admin Dashboard</h1>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-4">
+            <button
+              onClick={() => {
+                localStorage.removeItem("admin_token")
+                localStorage.removeItem("admin_email")
+                router.push("/admin/login")
+              }}
+              className="text-white/90 hover:text-white underline"
+            >
+              Logout
+            </button>
             <Link href="/" className="underline text-white/90 hover:text-white">
               Back to Site
             </Link>
@@ -609,7 +638,7 @@ export default function AdminPage() {
                     </CustomSelect>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Image :</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Image (Optional) :</label>
                     <div className="border border-gray-300 rounded-lg bg-gray-50 flex items-center overflow-hidden">
                       <input
                         type="file"
@@ -626,7 +655,7 @@ export default function AdminPage() {
                         <span>Upload File</span>
                       </label>
                       <span className="text-gray-400 text-sm px-4 flex-1">
-                        {variantImages && variantImages.length > 0 ? `${variantImages.length} file(s) chosen` : "No file Chosen"}
+                        {variantImages && variantImages.length > 0 ? `${variantImages.length} file(s) chosen` : "No file Chosen (Default: Logo2.png)"}
                       </span>
                     </div>
                   </div>
@@ -634,30 +663,26 @@ export default function AdminPage() {
                     const selectedCategory = categories.find(c => c._id === variantCatId)
                     const isMedicine = selectedCategory?.name?.toLowerCase().includes("medicine") || selectedCategory?.slug?.toLowerCase().includes("medicine")
                     
-                    // Hide Sub-Category field for medicines
-                    if (!isMedicine) {
-                      return (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Select Sub-Category :</label>
-                          <CustomSelect
-                            value={variantSubCatId}
-                            onChange={(e) => setVariantSubCatId(e.target.value)}
-                            required
-                            disabled={!variantCatId}
-                          >
-                            <option value="">Select Sub-Category</option>
-                            {subCategories
-                              .filter((p) => !variantCatId || p.categoryId === variantCatId)
-                              .map((p) => (
-                                <option key={p._id} value={p._id}>
-                                  {p.name}
-                                </option>
-                              ))}
-                          </CustomSelect>
-                        </div>
-                      )
-                    }
-                    return null
+                    // Sub-Category is optional for all categories
+                    return (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Select Sub-Category (Optional) :</label>
+                        <CustomSelect
+                          value={variantSubCatId}
+                          onChange={(e) => setVariantSubCatId(e.target.value)}
+                          disabled={!variantCatId}
+                        >
+                          <option value="">Select Sub-Category (Optional)</option>
+                          {subCategories
+                            .filter((p) => !variantCatId || p.categoryId === variantCatId)
+                            .map((p) => (
+                              <option key={p._id} value={p._id}>
+                                {p.name}
+                              </option>
+                            ))}
+                        </CustomSelect>
+                      </div>
+                    )
                   })()}
                   {/* Minimum Quantity - shown for all categories */}
                   <div>
@@ -806,7 +831,14 @@ export default function AdminPage() {
                             unoptimized
                           />
                         ) : (
-                          <div className="w-16 h-16 rounded-lg bg-gray-100" />
+                          <Image
+                            src="/Logo2.png"
+                            alt={v.name}
+                            width={64}
+                            height={64}
+                            className="w-16 h-16 object-contain rounded-lg"
+                            unoptimized
+                          />
                         )}
                         <div className="flex-1">
                           <p className="text-lg font-medium">{v.name}</p>
