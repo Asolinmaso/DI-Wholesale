@@ -13,6 +13,11 @@ const nextConfig = {
         hostname: "di-wholesale-backend.onrender.com",
         pathname: "/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
     ],
   },
 }

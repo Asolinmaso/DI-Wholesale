@@ -9,7 +9,7 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ProductToolbar } from "@/components/product-toolbar"
 import { useCart } from "@/lib/cart-context"
-import { mediaUrl } from "@/lib/api"
+import { mediaUrl, submitCheckout } from "@/lib/api"
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -38,30 +38,147 @@ export default function CheckoutPage() {
     businessType: "",
     message: "",
   })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState("")
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+
+    // Name validation
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required"
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters"
+    }
+
+    // Organization Name validation
+    if (!formData.orgName.trim()) {
+      newErrors.orgName = "Organization Name is required"
+    }
+
+    // Contact validation
+    if (!formData.contact.trim()) {
+      newErrors.contact = "Contact number is required"
+    } else {
+      const contactDigits = formData.contact.replace(/\D/g, '')
+      if (contactDigits.length < 10) {
+        newErrors.contact = "Contact number must be at least 10 digits"
+      }
+    }
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required"
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(formData.email.trim())) {
+        newErrors.email = "Please enter a valid email address"
+      }
+    }
+
+    // Address validation
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required"
+    }
+
+    // City validation
+    if (!formData.city.trim()) {
+      newErrors.city = "City is required"
+    }
+
+    // State validation
+    if (!formData.state.trim()) {
+      newErrors.state = "State is required"
+    }
+
+    // Country validation
+    if (!formData.country.trim()) {
+      newErrors.country = "Country is required"
+    }
+
+    // Pincode validation
+    if (!formData.pincode.trim()) {
+      newErrors.pincode = "Pincode is required"
+    } else if (!/^\d+$/.test(formData.pincode.trim())) {
+      newErrors.pincode = "Pincode must contain only numbers"
+    }
+
+    // Business Type validation
+    if (!formData.businessType) {
+      newErrors.businessType = "Business Type is required"
+    }
+
+    setErrors(newErrors)
+    return { isValid: Object.keys(newErrors).length === 0, firstError: Object.keys(newErrors)[0] }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSubmitError("")
     
     if (cartItems.length === 0) {
       alert("Your cart is empty. Please add items to cart first.")
       router.push("/products")
       return
     }
-    
-    console.log("Form submitted:", formData)
-    console.log("Cart items:", cartItems)
-    
-    // TODO: Send order to backend API
-    // For now, just show success message
-    alert("Order submitted successfully! We will contact you soon.")
-    router.push("/")
+
+    // Validate form
+    const validation = validateForm()
+    if (!validation.isValid) {
+      // Scroll to first error after a brief delay to allow state update
+      setTimeout(() => {
+        if (validation.firstError) {
+          const element = document.querySelector(`[name="${validation.firstError}"]`)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            ;(element as HTMLElement).focus()
+          }
+        }
+      }, 100)
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      // Prepare cart items for API
+      const checkoutCartItems = cartItems.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        size: item.size || undefined,
+        shape: item.shape || undefined,
+      }))
+
+      // Submit order
+      await submitCheckout(formData, checkoutCartItems)
+      
+      // Success - show message and redirect
+      alert("Order submitted successfully! You will receive a confirmation email shortly.")
+      router.push("/")
+    } catch (error) {
+      console.error("Checkout error:", error)
+      setSubmitError(error instanceof Error ? error.message : "Failed to submit order. Please try again.")
+      // Scroll to error message
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     })
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: "",
+      })
+    }
   }
 
   return (
@@ -162,6 +279,13 @@ export default function CheckoutPage() {
             {/* Form */}
             <div className="bg-white">
           <h2 className="text-2xl font-semibold mb-6 text-center">Fill Your Details</h2>
+          
+          {submitError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{submitError}</p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
@@ -172,9 +296,11 @@ export default function CheckoutPage() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Enter Name"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0]"
-                  required
+                  className={`w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0] ${
+                    errors.name ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
+                {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Organization Name :</label>
@@ -184,13 +310,17 @@ export default function CheckoutPage() {
                   value={formData.orgName}
                   onChange={handleChange}
                   placeholder="Enter Organization Name"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0]"
-                  required
+                  className={`w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0] ${
+                    errors.orgName ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
+                {errors.orgName && <p className="mt-1 text-sm text-red-500">{errors.orgName}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Contact :</label>
-                <div className="flex border border-gray-300 rounded-lg overflow-hidden focus-within:border-[#7B00E0] focus-within:ring-1 focus-within:ring-[#7B00E0]">
+                <div className={`flex border rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-[#7B00E0] ${
+                  errors.contact ? "border-red-500" : "border-gray-300 focus-within:border-[#7B00E0]"
+                }`}>
                   <select className="border-0 border-r border-gray-300 rounded-none px-3 py-2.5 focus:outline-none bg-white appearance-none" disabled>
                     <option>+91</option>
                   </select>
@@ -201,9 +331,9 @@ export default function CheckoutPage() {
                     onChange={handleChange}
                     placeholder="Contact"
                     className="flex-1 border-0 rounded-none px-4 py-2.5 focus:outline-none"
-                    required
                   />
                 </div>
+                {errors.contact && <p className="mt-1 text-sm text-red-500">{errors.contact}</p>}
               </div>
             </div>
 
@@ -216,9 +346,11 @@ export default function CheckoutPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Enter Email"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0]"
-                  required
+                  className={`w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0] ${
+                    errors.email ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
+                {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Address :</label>
@@ -228,9 +360,11 @@ export default function CheckoutPage() {
                   value={formData.address}
                   onChange={handleChange}
                   placeholder="Enter Address"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0]"
-                  required
+                  className={`w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0] ${
+                    errors.address ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
+                {errors.address && <p className="mt-1 text-sm text-red-500">{errors.address}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">City :</label>
@@ -240,9 +374,11 @@ export default function CheckoutPage() {
                   value={formData.city}
                   onChange={handleChange}
                   placeholder="Enter City"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0]"
-                  required
+                  className={`w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0] ${
+                    errors.city ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
+                {errors.city && <p className="mt-1 text-sm text-red-500">{errors.city}</p>}
               </div>
             </div>
 
@@ -255,9 +391,11 @@ export default function CheckoutPage() {
                   value={formData.state}
                   onChange={handleChange}
                   placeholder="Enter State"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0]"
-                  required
+                  className={`w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0] ${
+                    errors.state ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
+                {errors.state && <p className="mt-1 text-sm text-red-500">{errors.state}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Country :</label>
@@ -267,9 +405,11 @@ export default function CheckoutPage() {
                   value={formData.country}
                   onChange={handleChange}
                   placeholder="Enter Country"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0]"
-                  required
+                  className={`w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0] ${
+                    errors.country ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
+                {errors.country && <p className="mt-1 text-sm text-red-500">{errors.country}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Pincode :</label>
@@ -279,9 +419,11 @@ export default function CheckoutPage() {
                   value={formData.pincode}
                   onChange={handleChange}
                   placeholder="Enter Pincode"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0]"
-                  required
+                  className={`w-full border rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#7B00E0] ${
+                    errors.pincode ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
+                {errors.pincode && <p className="mt-1 text-sm text-red-500">{errors.pincode}</p>}
               </div>
             </div>
 
@@ -293,8 +435,9 @@ export default function CheckoutPage() {
                     name="businessType"
                     value={formData.businessType}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:border-[#7B00E0] appearance-none bg-white"
-                    required
+                    className={`w-full border rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:border-[#7B00E0] appearance-none bg-white ${
+                      errors.businessType ? "border-red-500" : "border-gray-300"
+                    }`}
                   >
                     <option value="">Select Business Type</option>
                     <option value="retailer">Retailer</option>
@@ -306,6 +449,7 @@ export default function CheckoutPage() {
                     </svg>
                   </div>
                 </div>
+                {errors.businessType && <p className="mt-1 text-sm text-red-500">{errors.businessType}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Upload Licence :</label>
@@ -336,9 +480,10 @@ export default function CheckoutPage() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="bg-[#7B00E0] text-white px-16 py-3 rounded-lg font-semibold hover:bg-[#6a00c4]"
+                disabled={isSubmitting}
+                className="bg-[#7B00E0] text-white px-16 py-3 rounded-lg font-semibold hover:bg-[#6a00c4] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit
+                {isSubmitting ? "Submitting..." : "Submit"}
               </button>
             </div>
           </form>

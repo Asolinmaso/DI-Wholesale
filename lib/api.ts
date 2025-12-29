@@ -175,4 +175,37 @@ export async function verifyToken(token: string): Promise<{ valid: boolean; emai
   return res
 }
 
+export interface CheckoutFormData {
+  name: string
+  orgName: string
+  contact: string
+  email: string
+  address: string
+  city: string
+  state: string
+  country: string
+  pincode: string
+  businessType: string
+  message?: string
+}
+
+export interface CheckoutCartItem {
+  name: string
+  quantity: number
+  size?: string
+  shape?: string
+}
+
+export async function submitCheckout(
+  formData: CheckoutFormData,
+  cartItems: CheckoutCartItem[]
+): Promise<{ message: string; orderId: string }> {
+  const res = await fetchJson<{ message: string; orderId: string }>(apiUrl("/api/orders/checkout"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...formData, cartItems }),
+  })
+  return res
+}
+
 
