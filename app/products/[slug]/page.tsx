@@ -32,6 +32,11 @@ export default function CategoryProductsPage() {
 
   useEffect(() => {
     async function load() {
+      setLoading(true)
+      // Clear previous data while loading new page
+      setProducts([])
+      setProductsResponse(null)
+      
       try {
         const cats = await listCategories()
         const cat = cats.find((c) => c.slug === slug)
@@ -50,10 +55,16 @@ export default function CategoryProductsPage() {
     load()
   }, [slug, page, perPage])
 
-  // Filter products on frontend for search (since search is client-side)
-  const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  )
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [page])
+
+  // Filter products on frontend for search (only search within current page)
+  // If no search, show all products from current page
+  const filtered = search.trim()
+    ? products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+    : products
 
   const totalPages = productsResponse?.pagination.totalPages || 0
   const currentPage = productsResponse?.pagination.currentPage || 1

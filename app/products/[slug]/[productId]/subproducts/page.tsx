@@ -43,6 +43,11 @@ export default function SubProductsPage() {
 
   useEffect(() => {
     async function load() {
+      setLoading(true)
+      // Clear previous data while loading new page
+      setSubProducts([])
+      setSubProductsResponse(null)
+      
       try {
         const cats = await listCategories()
         const cat = cats.find((c) => c.slug === slug)
@@ -63,15 +68,25 @@ export default function SubProductsPage() {
     load()
   }, [slug, productId, page, perPage])
 
-  // Filter sub-products on frontend for search (since search is client-side)
-  const filtered = subProducts.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  )
+  // Filter sub-products on frontend for search (only search within current page)
+  // If no search, show all products from current page
+  const filtered = search.trim()
+    ? subProducts.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+    : subProducts
 
   const totalPages = subProductsResponse?.pagination.totalPages || 0
   const currentPage = subProductsResponse?.pagination.currentPage || 1
   const hasNextPage = subProductsResponse?.pagination.hasNextPage || false
   const hasPrevPage = subProductsResponse?.pagination.hasPrevPage || false
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [page])
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage)
+  }
 
   const handleAddToCart = (sub: SubProduct) => {
     setSelectedSubProduct(sub)
