@@ -63,11 +63,20 @@ async function fetchJson<T>(input: RequestInfo | URL, init?: RequestInit): Promi
   return data as T
 }
 
-export async function listCategories(): Promise<Category[]> {
-  const res = await fetchJson<{ data: Category[] }>(apiUrl("/api/categories"), {
+export async function listCategories(search?: string, page?: number, limit?: number): Promise<PaginatedResponse<Category>> {
+  const params = new URLSearchParams()
+  if (search) params.append('search', search)
+  // Always send page and limit (defaults handled by backend if not provided)
+  const pageNum = page ?? 1
+  const limitNum = limit ?? 12
+  params.append('page', pageNum.toString())
+  params.append('limit', limitNum.toString())
+
+  const qs = `?${params.toString()}`
+  const res = await fetchJson<PaginatedResponse<Category>>(apiUrl(`/api/categories${qs}`), {
     cache: "no-store",
   })
-  return res.data
+  return res
 }
 
 export async function createCategory(form: FormData): Promise<Category> {
@@ -104,9 +113,10 @@ export interface PaginatedResponse<T> {
   }
 }
 
-export async function listProducts(categoryId?: string, page?: number, limit?: number): Promise<PaginatedResponse<Product>> {
+export async function listProducts(categoryId?: string, search?: string, page?: number, limit?: number): Promise<PaginatedResponse<Product>> {
   const params = new URLSearchParams()
   if (categoryId) params.append('categoryId', categoryId)
+  if (search) params.append('search', search)
   // Always send page and limit (defaults handled by backend if not provided)
   const pageNum = page ?? 1
   const limitNum = limit ?? 12
@@ -145,8 +155,9 @@ export async function deleteProduct(id: string): Promise<void> {
   await fetchJson(apiUrl(`/api/products/${id}`), { method: "DELETE" })
 }
 
-export async function listSubProducts(productId: string, page?: number, limit?: number): Promise<PaginatedResponse<SubProduct>> {
+export async function listSubProducts(productId: string, search?: string, page?: number, limit?: number): Promise<PaginatedResponse<SubProduct>> {
   const params = new URLSearchParams()
+  if (search) params.append('search', search)
   // Always send page and limit (defaults handled by backend if not provided)
   const pageNum = page ?? 1
   const limitNum = limit ?? 12
@@ -178,6 +189,24 @@ export async function updateSubProduct(productId: string, subId: string, form: F
 
 export async function deleteSubProduct(productId: string, subId: string): Promise<void> {
   await fetchJson(apiUrl(`/api/products/${productId}/sub-products/${subId}`), { method: "DELETE" })
+}
+
+// Get all sub-products with category and subcategory info (for admin)
+export async function listAllSubProducts(search?: string, categoryId?: string, productId?: string, page?: number, limit?: number): Promise<PaginatedResponse<SubProduct & { productId: Product & { categoryId: Category } }>> {
+  const params = new URLSearchParams()
+  if (search) params.append('search', search)
+  if (categoryId) params.append('categoryId', categoryId)
+  if (productId) params.append('productId', productId)
+  const pageNum = page ?? 1
+  const limitNum = limit ?? 12
+  params.append('page', pageNum.toString())
+  params.append('limit', limitNum.toString())
+
+  const qs = `?${params.toString()}`
+  const res = await fetchJson<PaginatedResponse<SubProduct & { productId: Product & { categoryId: Category } }>>(apiUrl(`/api/products/all/sub-products${qs}`), {
+    cache: "no-store",
+  })
+  return res
 }
 
 // Auth functions

@@ -132,3 +132,5 @@ export function getOptimizedImageUrl(url: string, width = 800, height = 800) {
 
   return getTransformedImageUrl(publicId, { w: width, h: height })
 }
+
+
