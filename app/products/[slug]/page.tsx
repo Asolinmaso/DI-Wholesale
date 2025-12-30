@@ -8,7 +8,7 @@ import { Search, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, X } from "luc
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ProductToolbar } from "@/components/product-toolbar"
-import { listCategories, listProducts, mediaUrl, Category, Product } from "@/lib/api"
+import { listCategories, listProducts, mediaUrl, Category, Product, PaginatedResponse } from "@/lib/api"
 import { useCart } from "@/lib/cart-context"
 
 export default function CategoryProductsPage() {
@@ -16,11 +16,12 @@ export default function CategoryProductsPage() {
   const slug = params.slug as string
   const { cartCount } = useCart()
   const [category, setCategory] = useState<Category | null>(null)
+  const [productsResponse, setProductsResponse] = useState<PaginatedResponse<Product> | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
-  const perPage = 9
+  const perPage = 12
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState({
     size: [] as string[],
@@ -36,8 +37,9 @@ export default function CategoryProductsPage() {
         const cat = cats.find((c) => c.slug === slug)
         if (cat) {
           setCategory(cat)
-          const prods = await listProducts(cat._id)
-          setProducts(prods)
+          const response = await listProducts(cat._id, page, perPage)
+          setProductsResponse(response)
+          setProducts(response.data)
         }
       } catch {
         console.error("Failed to load")
@@ -46,13 +48,17 @@ export default function CategoryProductsPage() {
       }
     }
     load()
-  }, [slug])
+  }, [slug, page, perPage])
 
+  // Filter products on frontend for search (since search is client-side)
   const filtered = products.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
   )
-  const totalPages = Math.ceil(filtered.length / perPage)
-  const paginated = filtered.slice((page - 1) * perPage, page * perPage)
+
+  const totalPages = productsResponse?.pagination.totalPages || 0
+  const currentPage = productsResponse?.pagination.currentPage || 1
+  const hasNextPage = productsResponse?.pagination.hasNextPage || false
+  const hasPrevPage = productsResponse?.pagination.hasPrevPage || false
 
   return (
     <main className="min-h-screen bg-white">
@@ -99,11 +105,11 @@ export default function CategoryProductsPage() {
       <section className="container mx-auto px-4 pb-8">
         {loading ? (
           <div className="text-center py-12 text-gray-500">Loading products...</div>
-        ) : paginated.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="text-center py-12 text-gray-500">No products found</div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            {paginated.map((product) => (
+            {filtered.map((product) => (
               <div
                 key={product._id}
                 className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 group"
@@ -148,34 +154,100 @@ export default function CategoryProductsPage() {
           </div>
         )}
 
-        {/* Pagination */}
+        {/* Improved Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 mt-8">
+            {/* Previous Button */}
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="p-2 border rounded-lg disabled:opacity-30"
+              disabled={!hasPrevPage}
+              className="flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={16} />
+              <span className="hidden sm:inline">Prev</span>
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPage(p)}
-                className={`w-9 h-9 rounded-lg font-medium ${
-                  p === page ? "bg-[#7B00E0] text-white" : "border hover:bg-gray-100"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
+
+            {/* Page Numbers with Ellipsis */}
+            <div className="flex items-center gap-1">
+              {(() => {
+                const pages = []
+                const showEllipsis = totalPages > 7
+
+                if (!showEllipsis) {
+                  // Show all pages if total pages <= 7
+                  for (let i = 1; i <= totalPages; i++) {
+                    pages.push(i)
+                  }
+                } else {
+                  // Always show first page
+                  pages.push(1)
+
+                  if (currentPage > 4) {
+                    pages.push('...')
+                  }
+
+                  // Show pages around current page
+                  const start = Math.max(2, currentPage - 1)
+                  const end = Math.min(totalPages - 1, currentPage + 1)
+
+                  for (let i = start; i <= end; i++) {
+                    if (i !== 1 && i !== totalPages) {
+                      pages.push(i)
+                    }
+                  }
+
+                  if (currentPage < totalPages - 3) {
+                    pages.push('...')
+                  }
+
+                  // Always show last page
+                  if (totalPages > 1) {
+                    pages.push(totalPages)
+                  }
+                }
+
+                return pages.map((pageNum, index) => {
+                  if (pageNum === '...') {
+                    return (
+                      <span key={`ellipsis-${index}`} className="px-2 py-1 text-gray-500">
+                        ...
+                      </span>
+                    )
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setPage(pageNum as number)}
+                      className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                        pageNum === currentPage
+                          ? "bg-[#7B00E0] text-white border-[#7B00E0]"
+                          : "border border-gray-300 hover:bg-gray-50 hover:border-[#7B00E0] hover:text-[#7B00E0]"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  )
+                })
+              })()}
+            </div>
+
+            {/* Next Button */}
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="p-2 border rounded-lg disabled:opacity-30"
+              disabled={!hasNextPage}
+              className="flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <ChevronRight size={18} />
+              <span className="hidden sm:inline">Next</span>
+              <ChevronRight size={16} />
             </button>
+          </div>
+        )}
+
+        {/* Pagination Info */}
+        {productsResponse && totalPages > 1 && (
+          <div className="text-center mt-4 text-sm text-gray-600">
+            Showing page {currentPage} of {totalPages} ({productsResponse.pagination.totalProducts} total products)
           </div>
         )}
       </section>
