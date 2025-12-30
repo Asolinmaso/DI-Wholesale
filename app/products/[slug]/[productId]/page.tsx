@@ -50,7 +50,7 @@ export default function SubProductsListPage() {
         const prod = await getProduct(productId)
         setProduct(prod)
 
-        const subsResponse = await listSubProducts(productId)
+        const subsResponse = await listSubProducts(productId, 1, 10000)
         setSubProducts(subsResponse.data)
       } catch (err) {
         console.error("Failed to load", err)

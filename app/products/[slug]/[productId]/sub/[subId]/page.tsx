@@ -49,7 +49,7 @@ export default function SubProductDetailPage() {
         const cat = cats.find((c) => c._id === prod.categoryId)
         if (cat) setCategory(cat)
 
-        const subsResponse = await listSubProducts(productId)
+        const subsResponse = await listSubProducts(productId, 1, 10000)
         const sub = subsResponse.data.find((s) => s._id === subProductId)
         if (sub) {
           setSubProduct(sub)
