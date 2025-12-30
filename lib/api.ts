@@ -87,12 +87,34 @@ export async function deleteCategory(id: string): Promise<void> {
   await fetchJson(apiUrl(`/api/categories/${id}`), { method: "DELETE" })
 }
 
-export async function listProducts(categoryId?: string): Promise<Product[]> {
-  const qs = categoryId ? `?categoryId=${encodeURIComponent(categoryId)}` : ""
-  const res = await fetchJson<{ data: Product[] }>(apiUrl(`/api/products${qs}`), {
+export interface PaginatedResponse<T> {
+  data: T[]
+  pagination: {
+    currentPage: number
+    totalPages: number
+    totalProducts: number
+    productsPerPage: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+    nextPage: number | null
+    prevPage: number | null
+  }
+}
+
+export async function listProducts(categoryId?: string, page?: number, limit?: number): Promise<PaginatedResponse<Product>> {
+  const params = new URLSearchParams()
+  if (categoryId) params.append('categoryId', categoryId)
+  // Always send page and limit (defaults handled by backend if not provided)
+  const pageNum = page ?? 1
+  const limitNum = limit ?? 12
+  params.append('page', pageNum.toString())
+  params.append('limit', limitNum.toString())
+
+  const qs = `?${params.toString()}`
+  const res = await fetchJson<PaginatedResponse<Product>>(apiUrl(`/api/products${qs}`), {
     cache: "no-store",
   })
-  return res.data
+  return res
 }
 
 export async function getProduct(id: string): Promise<Product> {
@@ -120,11 +142,19 @@ export async function deleteProduct(id: string): Promise<void> {
   await fetchJson(apiUrl(`/api/products/${id}`), { method: "DELETE" })
 }
 
-export async function listSubProducts(productId: string): Promise<SubProduct[]> {
-  const res = await fetchJson<{ data: SubProduct[] }>(apiUrl(`/api/products/${productId}/sub-products`), {
+export async function listSubProducts(productId: string, page?: number, limit?: number): Promise<PaginatedResponse<SubProduct>> {
+  const params = new URLSearchParams()
+  // Always send page and limit (defaults handled by backend if not provided)
+  const pageNum = page ?? 1
+  const limitNum = limit ?? 12
+  params.append('page', pageNum.toString())
+  params.append('limit', limitNum.toString())
+
+  const qs = `?${params.toString()}`
+  const res = await fetchJson<PaginatedResponse<SubProduct>>(apiUrl(`/api/products/${productId}/sub-products${qs}`), {
     cache: "no-store",
   })
-  return res.data
+  return res
 }
 
 export async function createSubProduct(productId: string, form: FormData): Promise<SubProduct> {
