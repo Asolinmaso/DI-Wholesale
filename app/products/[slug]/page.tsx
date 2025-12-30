@@ -34,11 +34,11 @@ export default function CategoryProductsPage() {
     async function load() {
       setLoading(true)
       try {
-        const cats = await listCategories()
-        const cat = cats.find((c) => c.slug === slug)
+        const catsResponse = await listCategories()
+        const cat = catsResponse.data.find((c) => c.slug === slug)
         if (cat) {
           setCategory(cat)
-          const response = await listProducts(cat._id, page, perPage)
+          const response = await listProducts(cat._id, undefined, page, perPage)
           setProductsResponse(response)
           setProducts(response.data)
         }

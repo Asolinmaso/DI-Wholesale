@@ -32,8 +32,8 @@ export default function ProductsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await listCategories()
-        setCategories(data)
+        const dataResponse = await listCategories()
+        setCategories(dataResponse.data)
       } catch {
         console.error("Failed to load categories")
       } finally {

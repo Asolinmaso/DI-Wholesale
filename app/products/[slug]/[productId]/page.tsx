@@ -47,14 +47,14 @@ export default function SubProductsListPage() {
     async function load() {
       setLoading(true)
       try {
-        const cats = await listCategories()
-        const cat = cats.find((c) => c.slug === slug)
+        const catsResponse = await listCategories()
+        const cat = catsResponse.data.find((c) => c.slug === slug)
         if (cat) setCategory(cat)
 
         const prod = await getProduct(productId)
         setProduct(prod)
 
-        const response = await listSubProducts(productId, page, perPage)
+        const response = await listSubProducts(productId, undefined, page, perPage)
         setSubProductsResponse(response)
         setSubProducts(response.data)
 

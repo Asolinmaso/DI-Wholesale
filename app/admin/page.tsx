@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Plus, Trash2, Package, FolderOpen, Pencil } from "lucide-react"
+import { Plus, Trash2, Package, FolderOpen, Pencil, Search, ChevronLeft, ChevronRight } from "lucide-react"
 
 // Custom Select Component with custom arrow
 function CustomSelect({ children, className = "", ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
@@ -24,6 +25,157 @@ function CustomSelect({ children, className = "", ...props }: React.SelectHTMLAt
     </div>
   )
 }
+
+// Multi-Select Component
+function MultiSelect({ value, onChange, options, placeholder }: {
+  value: string[],
+  onChange: (value: string[]) => void,
+  options: { value: string, label: string }[],
+  placeholder: string
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const handleToggle = (optionValue: string) => {
+    const newValue = value.includes(optionValue)
+      ? value.filter(v => v !== optionValue)
+      : [...value, optionValue]
+    onChange(newValue)
+  }
+
+  const handleRemove = (optionValue: string) => {
+    onChange(value.filter(v => v !== optionValue))
+  }
+
+  return (
+    <div className="relative">
+      <div
+        className="w-full border rounded-lg px-3 py-2 min-h-[42px] cursor-pointer bg-white flex flex-wrap gap-1"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {value.length === 0 ? (
+          <span className="text-gray-500">{placeholder}</span>
+        ) : (
+          value.map(val => {
+            const option = options.find(opt => opt.value === val)
+            return (
+              <span
+                key={val}
+                className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm flex items-center gap-1"
+              >
+                {option?.label || val}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleRemove(val)
+                  }}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  ×
+                </button>
+              </span>
+            )
+          })
+        )}
+        <div className="flex-1 flex justify-end">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 6L8 10L12 6" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 bg-white border rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+          {options.map(option => (
+            <div
+              key={option.value}
+              className={`px-3 py-2 cursor-pointer hover:bg-gray-50 ${
+                value.includes(option.value) ? 'bg-blue-50 text-blue-700' : ''
+              }`}
+              onClick={() => handleToggle(option.value)}
+            >
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={value.includes(option.value)}
+                  onChange={() => {}}
+                  className="rounded"
+                />
+                {option.label}
+              </label>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Search and Pagination Component
+function SearchAndPagination({
+  search,
+  onSearchChange,
+  pagination,
+  onPageChange,
+  placeholder = "Search..."
+}: {
+  search: string
+  onSearchChange: (value: string) => void
+  pagination: any
+  onPageChange: (page: number) => void
+  placeholder?: string
+}) {
+  if (!pagination) return null
+
+  const { currentPage, totalPages, totalProducts, hasPrevPage, hasNextPage } = pagination
+
+  return (
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+      {/* Search */}
+      <div className="relative flex-1 max-w-md">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-[#7B00E0]"
+        />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+      </div>
+
+      {/* Pagination Info */}
+      <div className="flex items-center gap-4">
+        <span className="text-sm text-gray-600">
+          Page {currentPage} of {totalPages} ({totalProducts} total)
+        </span>
+
+        {/* Pagination Controls */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={!hasPrevPage}
+            className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          <span className="px-3 py-2 bg-[#7B00E0] text-white rounded-lg text-sm font-medium">
+            {currentPage}
+          </span>
+
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={!hasNextPage}
+            className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 import {
   listCategories,
   createCategory,
@@ -34,6 +186,7 @@ import {
   updateProduct,
   deleteProduct,
   listSubProducts,
+  listAllSubProducts,
   createSubProduct,
   updateSubProduct,
   deleteSubProduct,
@@ -54,8 +207,23 @@ export default function AdminPage() {
   const [variants, setVariants] = useState<SubProduct[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>("") // filter sub-categories
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>("") // for variants
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("") // filter products by category
+  const [selectedSubCategoryFilter, setSelectedSubCategoryFilter] = useState<string>("") // filter products by subcategory
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
+  // Pagination and search state
+  const [categoriesPage, setCategoriesPage] = useState(1)
+  const [subCategoriesPage, setSubCategoriesPage] = useState(1)
+  const [productsPage, setProductsPage] = useState(1)
+  const [categoriesSearch, setCategoriesSearch] = useState("")
+  const [subCategoriesSearch, setSubCategoriesSearch] = useState("")
+  const [productsSearch, setProductsSearch] = useState("")
+
+  // Pagination data
+  const [categoriesPagination, setCategoriesPagination] = useState<any>(null)
+  const [subCategoriesPagination, setSubCategoriesPagination] = useState<any>(null)
+  const [productsPagination, setProductsPagination] = useState<any>(null)
 
   // Category form
   const [catName, setCatName] = useState("")
@@ -72,10 +240,10 @@ export default function AdminPage() {
   const [variantCatId, setVariantCatId] = useState("")
   const [variantSubCatId, setVariantSubCatId] = useState("")
   const [variantImages, setVariantImages] = useState<FileList | null>(null)
-  const [variantSize, setVariantSize] = useState("")
+  const [variantSize, setVariantSize] = useState<string[]>([])
   const [variantMinQty, setVariantMinQty] = useState("")
   const [variantDesc, setVariantDesc] = useState("")
-  const [variantShape, setVariantShape] = useState("")
+  const [variantShape, setVariantShape] = useState<string[]>([])
   const [variantMaterial, setVariantMaterial] = useState("")
   const [variantComposition, setVariantComposition] = useState("")
   const [editingVariantId, setEditingVariantId] = useState<string | null>(null)
@@ -101,33 +269,65 @@ export default function AdminPage() {
         router.push("/admin/login")
       })
     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
 
     // TEMPORARILY BYPASS AUTH FOR TESTING
     setAuthenticated(true)
     setCheckingAuth(false)
     fetchCategories()
     fetchSubCategories()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
 
   useEffect(() => {
     if (authenticated) {
-      fetchSubCategories(selectedCategory || undefined)
+      setSubCategoriesPage(1) // Reset to first page when category changes
+      fetchSubCategories(selectedCategory || undefined, "", 1)
     }
-  }, [selectedCategory, authenticated])
+  }, [selectedCategory, authenticated]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (authenticated && selectedSubCategory) {
-      fetchVariants(selectedSubCategory)
+      setProductsPage(1) // Reset to first page when subcategory changes
+      fetchVariants(selectedSubCategory, "", 1)
     } else if (authenticated) {
       setVariants([])
+      setProductsPagination(null)
     }
-  }, [selectedSubCategory, authenticated])
+  }, [selectedSubCategory, authenticated]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (authenticated && variantCatId) {
       fetchSubCategories(variantCatId)
     }
-  }, [variantCatId, authenticated])
+  }, [variantCatId, authenticated]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Handle search and pagination changes
+  useEffect(() => {
+    if (authenticated && tab === "categories") {
+      fetchCategories(categoriesSearch, categoriesPage)
+    }
+  }, [categoriesSearch, categoriesPage, tab, authenticated]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (authenticated && tab === "sub-categories") {
+      fetchSubCategories(selectedCategory || undefined, subCategoriesSearch, subCategoriesPage)
+    }
+  }, [subCategoriesSearch, subCategoriesPage, tab, authenticated]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load subcategories when category filter is selected in products tab
+  useEffect(() => {
+    if (authenticated && tab === "products" && selectedCategoryFilter) {
+      fetchSubCategories(selectedCategoryFilter, "", 1)
+    }
+  }, [selectedCategoryFilter, tab, authenticated]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (authenticated && tab === "products") {
+      // Use new endpoint to get all products with category/subcategory info
+      fetchAllProducts(productsSearch, selectedCategoryFilter, selectedSubCategoryFilter, productsPage)
+    }
+  }, [productsSearch, productsPage, tab, authenticated, selectedCategoryFilter, selectedSubCategoryFilter]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // COMMENTED OUT AUTH CHECK FOR TESTING
   /*
@@ -140,32 +340,64 @@ export default function AdminPage() {
   }
   */
 
-  async function fetchCategories() {
+  const fetchCategories = useCallback(async (search = categoriesSearch, page = categoriesPage) => {
     try {
-      const data = await listCategories()
-      setCategories(data)
+      setLoading(true)
+      const response = await listCategories(search || undefined, page, 12)
+      setCategories(response.data)
+      setCategoriesPagination(response.pagination)
     } catch {
       setError("Failed to load categories")
+    } finally {
+      setLoading(false)
     }
-  }
+  }, [categoriesSearch, categoriesPage])
 
-  async function fetchSubCategories(catId?: string) {
+  const fetchSubCategories = useCallback(async (catId?: string, search = subCategoriesSearch, page = subCategoriesPage) => {
     try {
-      const response = await listProducts(catId)
+      setLoading(true)
+      const response = await listProducts(catId || undefined, search || undefined, page, 12)
       setSubCategories(response.data)
+      setSubCategoriesPagination(response.pagination)
     } catch {
       setError("Failed to load sub-categories")
+    } finally {
+      setLoading(false)
     }
-  }
+  }, [subCategoriesSearch, subCategoriesPage])
 
-  async function fetchVariants(productId: string) {
+  const fetchVariants = useCallback(async (productId: string, search = productsSearch, page = productsPage) => {
     try {
-      const response = await listSubProducts(productId)
+      setLoading(true)
+      const response = await listSubProducts(productId, search || undefined, page, 12)
       setVariants(response.data)
+      setProductsPagination(response.pagination)
     } catch {
       setError("Failed to load products")
+    } finally {
+      setLoading(false)
     }
-  }
+  }, [productsSearch, productsPage])
+
+  // Fetch all products with category and subcategory info
+  const fetchAllProducts = useCallback(async (search = productsSearch, categoryId = selectedCategoryFilter, productId = selectedSubCategoryFilter, page = productsPage) => {
+    try {
+      setLoading(true)
+      const response = await listAllSubProducts(
+        search || undefined,
+        categoryId || undefined,
+        productId || undefined,
+        page,
+        12
+      )
+      setVariants(response.data as any)
+      setProductsPagination(response.pagination)
+    } catch {
+      setError("Failed to load products")
+    } finally {
+      setLoading(false)
+    }
+  }, [productsSearch, selectedCategoryFilter, selectedSubCategoryFilter, productsPage])
 
   async function handleCreateOrUpdateCategory(e: React.FormEvent) {
     e.preventDefault()
@@ -181,7 +413,7 @@ export default function AdminPage() {
       setCatName("")
       setCatImages(null)
       setEditingCatId(null)
-      fetchCategories()
+      fetchCategories(categoriesSearch, categoriesPage)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save category")
     } finally {
@@ -221,7 +453,7 @@ export default function AdminPage() {
       setSubCatName("")
       setSubCatCatId("")
       setEditingSubCatId(null)
-      fetchSubCategories(selectedCategory || undefined)
+      fetchSubCategories(selectedCategory || undefined, subCategoriesSearch, subCategoriesPage)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save sub-category")
     } finally {
@@ -241,7 +473,7 @@ export default function AdminPage() {
     try {
       await deleteProduct(id)
       if (selectedSubCategory === id) setSelectedSubCategory("")
-      fetchSubCategories(selectedCategory || undefined)
+      fetchSubCategories(selectedCategory || undefined, subCategoriesSearch, subCategoriesPage)
     } catch {
       setError("Failed to delete sub-category")
     }
@@ -256,8 +488,8 @@ export default function AdminPage() {
     try {
       const form = new FormData()
       form.append("name", variantName)
-      form.append("productSize", variantSize || "")
-      form.append("productShape", variantShape || "")
+      form.append("productSize", JSON.stringify(variantSize))
+      form.append("productShape", JSON.stringify(variantShape))
       form.append("minimumQuantity", "10") // Always 10 for users
       form.append("stockCount", variantMinQty || "0") // Stocks field
       form.append("material", variantMaterial || "")
@@ -296,14 +528,14 @@ export default function AdminPage() {
       setVariantCatId("")
       setVariantSubCatId("")
       setVariantImages(null)
-      setVariantSize("")
+      setVariantSize([])
       setVariantMinQty("")
       setVariantDesc("")
-      setVariantShape("")
+      setVariantShape([])
       setVariantMaterial("")
       setVariantComposition("")
       setEditingVariantId(null)
-      if (variantSubCatId) fetchVariants(variantSubCatId)
+      if (variantSubCatId) fetchVariants(variantSubCatId, productsSearch, productsPage)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save product")
     } finally {
@@ -311,33 +543,50 @@ export default function AdminPage() {
     }
   }
 
-  function startEditVariant(v: SubProduct) {
+  function startEditVariant(v: any) {
     setEditingVariantId(v._id)
     setVariantName(v.name)
     setVariantImages(null)
-    setVariantSize(v.productSize || "")
+    setVariantSize(Array.isArray(v.productSize) ? v.productSize : (v.productSize ? [v.productSize] : []))
     setVariantMinQty(String(v.stockCount || ""))
     setVariantDesc(v.description || "")
-    setVariantShape(v.productShape || "")
+    setVariantShape(Array.isArray(v.productShape) ? v.productShape : (v.productShape ? [v.productShape] : []))
     setVariantMaterial(v.material || "")
     setVariantComposition(v.composition || "")
     
-    // Find the product to get categoryId
-    const prod = subCategories.find((p) => p._id === v.productId)
-    if (prod) {
-      setVariantCatId(prod.categoryId)
-      setVariantSubCatId(v.productId)
+    // Handle both old format (v.productId as string) and new format (v.productId as populated object)
+    const productId = typeof v.productId === 'string' ? v.productId : v.productId?._id
+    const categoryId = typeof v.productId === 'object' && v.productId?.categoryId 
+      ? (typeof v.productId.categoryId === 'string' ? v.productId.categoryId : v.productId.categoryId?._id)
+      : null
+    
+    // Find the product to get categoryId if not already populated
+    if (!categoryId) {
+      const prod = subCategories.find((p) => p._id === productId)
+      if (prod) {
+        setVariantCatId(prod.categoryId)
+        setVariantSubCatId(productId)
+      }
+    } else {
+      setVariantCatId(categoryId)
+      setVariantSubCatId(productId)
     }
     setTab("products")
-    setSelectedSubCategory(v.productId)
+    setSelectedSubCategory(productId)
   }
 
-  async function handleDeleteVariant(subId: string) {
-    if (!selectedSubCategory) return
+  async function handleDeleteVariant(subId: string, productId?: string) {
+    const productIdToUse = productId || selectedSubCategory
+    if (!productIdToUse) return
     if (!confirm("Delete this product?")) return
     try {
-      await deleteSubProduct(selectedSubCategory, subId)
-      fetchVariants(selectedSubCategory)
+      await deleteSubProduct(productIdToUse, subId)
+      if (tab === "products") {
+        // Refresh all products list
+        fetchAllProducts(productsSearch, selectedCategoryFilter, selectedSubCategoryFilter, productsPage)
+      } else {
+        fetchVariants(productIdToUse, productsSearch, productsPage)
+      }
     } catch {
       setError("Failed to delete product")
     }
@@ -464,6 +713,16 @@ export default function AdminPage() {
               </div>
 
               <div className="p-8">
+                <SearchAndPagination
+                  search={categoriesSearch}
+                  onSearchChange={(value) => {
+                    setCategoriesSearch(value)
+                    setCategoriesPage(1) // Reset to first page on search
+                  }}
+                  pagination={categoriesPagination}
+                  onPageChange={setCategoriesPage}
+                  placeholder="Search categories..."
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {categories.map((cat) => (
                     <div key={cat._id} className="flex items-center gap-4 border rounded-xl shadow-sm p-4">
@@ -593,6 +852,16 @@ export default function AdminPage() {
                     ))}
                   </CustomSelect>
                 </div>
+                <SearchAndPagination
+                  search={subCategoriesSearch}
+                  onSearchChange={(value) => {
+                    setSubCategoriesSearch(value)
+                    setSubCategoriesPage(1) // Reset to first page on search
+                  }}
+                  pagination={subCategoriesPagination}
+                  onPageChange={setSubCategoriesPage}
+                  placeholder="Search sub-categories..."
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {subCategories.map((p) => (
                     <div key={p._id} className="flex items-center gap-4 border rounded-xl shadow-sm p-4">
@@ -720,33 +989,40 @@ export default function AdminPage() {
                         <>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Product Size :</label>
-                            <CustomSelect
+                            <MultiSelect
                               value={variantSize}
-                              onChange={(e) => setVariantSize(e.target.value)}
-                            >
-                              <option value="">Select Size</option>
-                              <option value='5"'>5&quot;</option>
-                              <option value='6"'>6&quot;</option>
-                              <option value='7"'>7&quot;</option>
-                              <option value='8"'>8&quot;</option>
-                              <option value='9"'>9&quot;</option>
-                              <option value='10"'>10&quot;</option>
-                              <option value='11"'>11&quot;</option>
-                              <option value='12"'>12&quot;</option>
-                            </CustomSelect>
+                              onChange={setVariantSize}
+                              options={[
+                                { value: '3.5"', label: '3.5"' },
+                                { value: '5"', label: '5"' },
+                                { value: '5.5"', label: '5.5"' },
+                                { value: '6"', label: '6"' },
+                                { value: '6.5"', label: '6.5"' },
+                                { value: '7"', label: '7"' },
+                                { value: '7.5"', label: '7.5"' },
+                                { value: '8"', label: '8"' },
+                                { value: '9"', label: '9"' },
+                                { value: '10"', label: '10"' },
+                                { value: '11"', label: '11"' },
+                                { value: '12"', label: '12"' },
+                                { value: '14"', label: '14"' }
+                              ]}
+                              placeholder="Select sizes..."
+                            />
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Product Shape :</label>
-                            <CustomSelect
+                            <MultiSelect
                               value={variantShape}
-                              onChange={(e) => setVariantShape(e.target.value)}
-                            >
-                              <option value="">Select Shape</option>
-                              <option value="Straight">Straight</option>
-                              <option value="Curved">Curved</option>
-                              <option value="Teeth">Teeth</option>
-                              <option value="Plain">Plain</option>
-                            </CustomSelect>
+                              onChange={setVariantShape}
+                              options={[
+                                { value: 'Straight', label: 'Straight' },
+                                { value: 'Curved', label: 'Curved' },
+                                { value: 'Teeth', label: 'Teeth' },
+                                { value: 'Plain', label: 'Plain' }
+                              ]}
+                              placeholder="Select shapes..."
+                            />
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Material :</label>
@@ -805,10 +1081,10 @@ export default function AdminPage() {
                           setVariantCatId("")
                           setVariantSubCatId("")
                           setVariantImages(null)
-                          setVariantSize("")
+                          setVariantSize([])
                           setVariantMinQty("")
                           setVariantDesc("")
-                          setVariantShape("")
+                          setVariantShape([])
                           setVariantMaterial("")
                           setVariantComposition("")
                         }}
@@ -821,59 +1097,140 @@ export default function AdminPage() {
               </div>
 
               <div className="p-8">
-                <div className="flex items-center gap-4 mb-6">
-                  <h3 className="text-xl font-semibold">Products List</h3>
+                <div className="flex items-center gap-4 mb-6 flex-wrap">
+                  <h3 className="text-xl font-semibold">All Products</h3>
                   <CustomSelect
-                    value={selectedSubCategory}
-                    onChange={(e) => setSelectedSubCategory(e.target.value)}
+                    value={selectedCategoryFilter}
+                    onChange={(e) => {
+                      setSelectedCategoryFilter(e.target.value)
+                      setSelectedSubCategoryFilter("")
+                      setProductsPage(1)
+                    }}
                   >
-                    <option value="">Select Sub-Category to view products</option>
-                    {subCategories.map((p) => (
-                      <option key={p._id} value={p._id}>
-                        {p.name}
+                    <option value="">All Categories</option>
+                    {categories.map((c) => (
+                      <option key={c._id} value={c._id}>
+                        {c.name}
                       </option>
                     ))}
                   </CustomSelect>
+                  <CustomSelect
+                    value={selectedSubCategoryFilter}
+                    onChange={(e) => {
+                      setSelectedSubCategoryFilter(e.target.value)
+                      setProductsPage(1)
+                    }}
+                    disabled={!selectedCategoryFilter}
+                  >
+                    <option value="">All Sub-Categories</option>
+                    {subCategories
+                      .filter((p) => !selectedCategoryFilter || p.categoryId === selectedCategoryFilter)
+                      .map((p) => (
+                        <option key={p._id} value={p._id}>
+                          {p.name}
+                        </option>
+                      ))}
+                  </CustomSelect>
                 </div>
-                {!selectedSubCategory ? (
-                  <div className="text-gray-500">Select a Sub-Category to view products.</div>
-                ) : (
-                  <div className="space-y-3">
-                    {variants.map((v) => (
-                      <div key={v._id} className="flex items-center gap-4 border rounded-xl shadow-sm p-4">
-                        {v.images?.[0] ? (
-                          <Image
-                            src={mediaUrl(v.images[0])}
-                            alt={v.name}
-                            width={64}
-                            height={64}
-                            className="w-16 h-16 object-cover rounded-lg"
-                            unoptimized
-                          />
-                        ) : (
-                          <Image
-                            src="/Medicine_image.png"
-                            alt={v.name}
-                            width={64}
-                            height={64}
-                            className="w-16 h-16 object-contain rounded-lg"
-                            unoptimized
-                          />
-                        )}
-                        <div className="flex-1">
-                          <p className="text-lg font-medium">{v.name}</p>
-                        </div>
-                        <button onClick={() => startEditVariant(v)} className="text-gray-600 hover:text-gray-900">
-                          <Pencil size={18} />
-                        </button>
-                        <button onClick={() => handleDeleteVariant(v._id)} className="text-gray-600 hover:text-red-600">
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    ))}
-                    {variants.length === 0 && <div className="text-gray-500">No products yet.</div>}
-                  </div>
-                )}
+                <SearchAndPagination
+                  search={productsSearch}
+                  onSearchChange={(value) => {
+                    setProductsSearch(value)
+                    setProductsPage(1) // Reset to first page on search
+                  }}
+                  pagination={productsPagination}
+                  onPageChange={setProductsPage}
+                  placeholder="Search products..."
+                />
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-gray-100 border-b">
+                        <th className="text-left px-4 py-3 font-semibold text-gray-700">Image</th>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-700">Product Name</th>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-700">Category</th>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-700">Sub-Category</th>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-700">Size</th>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-700">Shape</th>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-700">Stocks</th>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-700">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {variants.map((v: any) => {
+                        const product = v.productId
+                        const category = product?.categoryId
+                        return (
+                          <tr key={v._id} className="border-b hover:bg-gray-50">
+                            <td className="px-4 py-3">
+                              {v.images?.[0] ? (
+                                <Image
+                                  src={mediaUrl(v.images[0])}
+                                  alt={v.name}
+                                  width={48}
+                                  height={48}
+                                  className="w-12 h-12 object-cover rounded-lg"
+                                  unoptimized
+                                />
+                              ) : (
+                                <Image
+                                  src="/Medicine_image.png"
+                                  alt={v.name}
+                                  width={48}
+                                  height={48}
+                                  className="w-12 h-12 object-contain rounded-lg"
+                                  unoptimized
+                                />
+                              )}
+                            </td>
+                            <td className="px-4 py-3 font-medium">{v.name}</td>
+                            <td className="px-4 py-3 text-gray-600">{category?.name || "N/A"}</td>
+                            <td className="px-4 py-3 text-gray-600">{product?.name || "N/A"}</td>
+                            <td className="px-4 py-3 text-gray-600">
+                              {Array.isArray(v.productSize) && v.productSize.length > 0 ? v.productSize.join(", ") : "-"}
+                            </td>
+                            <td className="px-4 py-3 text-gray-600">
+                              {Array.isArray(v.productShape) && v.productShape.length > 0 ? v.productShape.join(", ") : "-"}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded-full text-sm font-medium ${
+                                (v.stockCount || 0) > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                              }`}>
+                                {v.stockCount || 0}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <button 
+                                  onClick={() => {
+                                    if (product?._id) {
+                                      setSelectedSubCategory(product._id)
+                                      startEditVariant(v)
+                                    }
+                                  }} 
+                                  className="text-gray-600 hover:text-gray-900"
+                                  title="Edit"
+                                >
+                                  <Pencil size={18} />
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteVariant(v._id, product?._id)} 
+                                  className="text-gray-600 hover:text-red-600"
+                                  title="Delete"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                  {variants.length === 0 && !loading && (
+                    <div className="text-center py-12 text-gray-500">No products found.</div>
+                  )}
+                </div>
               </div>
             </div>
           )}

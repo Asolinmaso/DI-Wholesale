@@ -16,7 +16,7 @@ export function OurProducts() {
     listCategories()
       .then((data) => {
         if (!mounted) return
-        setCategories(data)
+        setCategories(data.data)
       })
       .catch((e) => {
         if (!mounted) return

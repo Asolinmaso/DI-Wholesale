@@ -43,8 +43,9 @@ export default function SubProductDetailPage() {
   useEffect(() => {
     async function load() {
       try {
-        const cats = await listCategories()
-        
+        const catsResponse = await listCategories()
+        const cats = catsResponse.data
+
         const prod = await getProduct(productId)
         setProduct(prod)
 
@@ -99,15 +100,24 @@ export default function SubProductDetailPage() {
 
     const isMedicine = category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine")
 
-    // For medicines, only quantity is required. For others, size and shape are required
-    if (!isMedicine && (!selectedSize || !selectedShape)) {
+    // For medicines, show modal only if quantity needs to be set
+    if (isMedicine && quantity < minQuantity) {
       setShowSizeModal(true)
       return
     }
 
-    // For medicines, show modal only if quantity needs to be set
-    if (isMedicine && quantity < minQuantity) {
+    // For non-medicine products, show modal if multiple sizes/shapes are available
+    const availableSizes = Array.isArray(subProduct.productSize) ? subProduct.productSize : []
+    const availableShapes = Array.isArray(subProduct.productShape) ? subProduct.productShape : []
+
+    if (!isMedicine && ((availableSizes.length > 1 || availableShapes.length > 1) || (!selectedSize && !selectedShape))) {
       setShowSizeModal(true)
+      return
+    }
+
+    // Validate stock availability
+    if (quantity > maxQuantity) {
+      alert(`Cannot add ${quantity} items. Only ${maxQuantity} items available in stock.`)
       return
     }
 
@@ -118,8 +128,8 @@ export default function SubProductDetailPage() {
         name: subProduct.name,
         image: subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : "",
         quantity,
-        size: isMedicine ? "" : selectedSize,
-        shape: isMedicine ? "" : selectedShape,
+        size: isMedicine ? "" : (selectedSize || (availableSizes.length === 1 ? availableSizes[0] : "")),
+        shape: isMedicine ? "" : (selectedShape || (availableShapes.length === 1 ? availableShapes[0] : "")),
       })
       setShowSizeModal(false)
       router.push("/cart")
@@ -138,15 +148,17 @@ export default function SubProductDetailPage() {
   }
 
   // Parse sizes and shapes from product data, fallback to defaults
-  const sizes = subProduct?.productSize 
-    ? subProduct.productSize.split(',').map(s => s.trim()).filter(Boolean)
+  const sizes = Array.isArray(subProduct?.productSize) && subProduct.productSize.length > 0
+    ? subProduct.productSize
     : ["5\"", "6\"", "7\"", "8\"", "9\"", "10\"", "11\"", "12\""]
-  const shapes = subProduct?.productShape
-    ? subProduct.productShape.split(',').map(s => s.trim()).filter(Boolean)
+  const shapes = Array.isArray(subProduct?.productShape) && subProduct.productShape.length > 0
+    ? subProduct.productShape
     : ["Straight", "Curved", "Teeth", "Plain"]
   
-  // Always use 10 as minimum quantity for users
+  // Minimum quantity is 10, but cannot exceed available stock
   const minQuantity = 10
+  const maxQuantity = subProduct?.stockCount || 0
+  const effectiveMaxQuantity = Math.max(minQuantity, Math.min(maxQuantity, maxQuantity))
 
   if (loading) {
     return (
@@ -257,41 +269,12 @@ export default function SubProductDetailPage() {
               </p>
             )}
 
-            {/* Size/Shape/Quantity Button - Only show for non-medicines */}
-            {(() => {
-              const isMedicine = category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine")
-              if (isMedicine) return null
-              
-              return (
-                <button
-                  onClick={handleSelectSizeShape}
-                  className="w-full md:w-auto border border-gray-300 rounded-lg px-6 py-3 text-base flex items-center justify-between gap-4 mb-4 hover:border-[#7B00E0]"
-                >
-                  <span>
-                    {selectedSize && selectedShape 
-                      ? `Size: ${selectedSize}, Shape: ${selectedShape}` 
-                      : "Select Size, Shape & Quantity"
-                    }
-                  </span>
-                  <svg width="20" height="12" viewBox="0 0 20 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0.825786 4.46821L8.03978 11.2358C8.29746 11.4781 8.60354 11.6703 8.94049 11.8014C9.27744 11.9325 9.63864 12 10.0034 12C10.3682 12 10.7294 11.9325 11.0664 11.8014C11.4033 11.6703 11.7094 11.4781 11.9671 11.2358L19.1811 4.46821C20.9358 2.82203 19.6824 0 17.2035 0H2.77551C0.296573 0 -0.92897 2.82203 0.825786 4.46821Z" fill="#8A8A8A"/>
-                  </svg>
-                </button>
-              )
-            })()}
-
             <button
-              onClick={() => {
-                const isMedicine = category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine")
-                if (isMedicine) {
-                  setShowSizeModal(true)
-                } else {
-                  handleAddToCart()
-                }
-              }}
-              className="w-full bg-[#7B00E0] text-white px-12 py-4 rounded-lg font-semibold hover:bg-[#6a00c4] mb-8"
+              onClick={handleAddToCart}
+              disabled={!subProduct?.stockCount || subProduct.stockCount <= 0}
+              className="w-full bg-[#7B00E0] text-white px-12 py-4 rounded-lg font-semibold hover:bg-[#6a00c4] mb-8 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#7B00E0]"
             >
-              Add to Cart
+              {!subProduct?.stockCount || subProduct.stockCount <= 0 ? "Out of Stock" : "Add to Cart"}
             </button>
 
             {/* Attributes Table */}
@@ -322,22 +305,29 @@ export default function SubProductDetailPage() {
                       <td className="px-5 py-3 font-medium">{subProduct.material}</td>
                     </tr>
                   )}
-                  {subProduct.productSize && (
+                  {subProduct.productSize && Array.isArray(subProduct.productSize) && subProduct.productSize.length > 0 && (
                     <tr>
                       <td className="px-5 py-3 text-gray-600">Size Options</td>
-                      <td className="px-5 py-3 font-medium">{subProduct.productSize}</td>
+                      <td className="px-5 py-3 font-medium">{subProduct.productSize.join(", ")}</td>
                     </tr>
                   )}
-                  {subProduct.productShape && (
+                  {subProduct.productShape && Array.isArray(subProduct.productShape) && subProduct.productShape.length > 0 && (
                     <tr>
                       <td className="px-5 py-3 text-gray-600">Shape Options</td>
-                      <td className="px-5 py-3 font-medium">{subProduct.productShape}</td>
+                      <td className="px-5 py-3 font-medium">{subProduct.productShape.join(", ")}</td>
                     </tr>
                   )}
-                  {subProduct.stockCount && subProduct.stockCount > 0 && (
+                  {subProduct.stockCount !== undefined && (
                     <tr>
-                      <td className="px-5 py-3 text-gray-600">Stocks</td>
-                      <td className="px-5 py-3 font-medium">{subProduct.stockCount} pieces</td>
+                      <td className="px-5 py-3 text-gray-600">Stock Status</td>
+                      <td className={`px-5 py-3 font-medium ${
+                        subProduct.stockCount > 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {subProduct.stockCount > 0
+                          ? `${subProduct.stockCount} pieces available`
+                          : 'Out of stock'
+                        }
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -441,31 +431,49 @@ export default function SubProductDetailPage() {
                       <div className="flex items-center gap-4">
                         <button
                           onClick={() => setQuantity((q) => Math.max(minQuantity, q - 1))}
-                          className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0]"
+                          disabled={quantity <= minQuantity}
+                          className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           −
                         </button>
                         <input
                           type="number"
                           value={quantity}
-                          onChange={(e) => setQuantity(Math.max(minQuantity, parseInt(e.target.value) || minQuantity))}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value) || minQuantity
+                            setQuantity(Math.max(minQuantity, Math.min(effectiveMaxQuantity, val)))
+                          }}
                           className="w-24 h-12 border-2 border-gray-300 rounded-lg text-center text-xl font-medium"
                           min={minQuantity}
+                          max={effectiveMaxQuantity}
                         />
                         <button
-                          onClick={() => setQuantity((q) => q + 1)}
-                          className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0]"
+                          onClick={() => setQuantity((q) => Math.min(effectiveMaxQuantity, q + 1))}
+                          disabled={quantity >= effectiveMaxQuantity}
+                          className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           +
                         </button>
                       </div>
-                      <p className="text-gray-500 mt-3">Note : Minimum Purchase Quantity is 10 Strips/Bottles</p>
+                      <div className="text-gray-500 mt-3 space-y-1">
+                        <p>Note: Minimum Purchase Quantity is 10 Strips/Bottles</p>
+                        {maxQuantity > 0 && (
+                          <p>Available Stock: {maxQuantity} pieces {quantity > maxQuantity && "(Insufficient stock)"}</p>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex justify-end mt-8">
                       <button
                         onClick={async () => {
                           if (!subProduct || !product) return
+
+                          // Validate stock availability for medicines
+                          if (quantity > maxQuantity) {
+                            alert(`Cannot add ${quantity} items. Only ${maxQuantity} items available in stock.`)
+                            return
+                          }
+
                           try {
                             await addToCart({
                               productId: product._id,
@@ -483,7 +491,8 @@ export default function SubProductDetailPage() {
                             alert("Failed to add item to cart. Please try again.")
                           }
                         }}
-                        className="bg-[#7B00E0] text-white px-12 py-4 rounded-2xl text-lg font-semibold hover:bg-[#6a00c4]"
+                        disabled={quantity > maxQuantity}
+                        className="bg-[#7B00E0] text-white px-12 py-4 rounded-2xl text-lg font-semibold hover:bg-[#6a00c4] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#7B00E0]"
                       >
                         Add to Cart
                       </button>
@@ -541,25 +550,36 @@ export default function SubProductDetailPage() {
                     <div className="flex items-center gap-4">
                       <button
                         onClick={() => setQuantity((q) => Math.max(minQuantity, q - 1))}
-                        className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0]"
+                        disabled={quantity <= minQuantity}
+                        className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         −
                       </button>
                       <input
                         type="number"
                         value={quantity}
-                        onChange={(e) => setQuantity(Math.max(minQuantity, parseInt(e.target.value) || minQuantity))}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || minQuantity
+                          setQuantity(Math.max(minQuantity, Math.min(effectiveMaxQuantity, val)))
+                        }}
                         className="w-24 h-12 border-2 border-gray-300 rounded-lg text-center text-xl font-medium"
                         min={minQuantity}
+                        max={effectiveMaxQuantity}
                       />
                       <button
-                        onClick={() => setQuantity((q) => q + 1)}
-                        className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0]"
+                        onClick={() => setQuantity((q) => Math.min(effectiveMaxQuantity, q + 1))}
+                        disabled={quantity >= effectiveMaxQuantity}
+                        className="w-12 h-12 border-2 border-gray-300 rounded-lg text-2xl hover:border-[#7B00E0] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         +
                       </button>
                     </div>
-                    <p className="text-gray-500 mt-3">Note : Minimum Purchase Quantity is 10 pcs</p>
+                    <div className="text-gray-500 mt-3 space-y-1">
+                      <p>Note: Minimum Purchase Quantity is 10 pcs</p>
+                      {maxQuantity > 0 && (
+                        <p>Available Stock: {maxQuantity} pcs {quantity > maxQuantity && "(Insufficient stock)"}</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex justify-end mt-8">
