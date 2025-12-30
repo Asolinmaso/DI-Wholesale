@@ -92,7 +92,7 @@ export default function SubProductsListPage() {
           name: subProduct.name,
           image: subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : (category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine") ? "/Medicine_image.png" : "/Logo2.png")
         })
-        setSavedProducts(prev => new Set([...prev, subProduct._id]))
+        setSavedProducts(prev => new Set(Array.from(prev).concat(subProduct._id)))
       }
     } catch (error) {
       console.error("Failed to toggle save:", error)

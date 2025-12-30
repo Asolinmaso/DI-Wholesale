@@ -725,14 +725,14 @@ export default function AdminPage() {
                               onChange={(e) => setVariantSize(e.target.value)}
                             >
                               <option value="">Select Size</option>
-                              <option value="5&quot;">5"</option>
-                              <option value="6&quot;">6"</option>
-                              <option value="7&quot;">7"</option>
-                              <option value="8&quot;">8"</option>
-                              <option value="9&quot;">9"</option>
-                              <option value="10&quot;">10"</option>
-                              <option value="11&quot;">11"</option>
-                              <option value="12&quot;">12"</option>
+                              <option value='5"'>5&quot;</option>
+                              <option value='6"'>6&quot;</option>
+                              <option value='7"'>7&quot;</option>
+                              <option value='8"'>8&quot;</option>
+                              <option value='9"'>9&quot;</option>
+                              <option value='10"'>10&quot;</option>
+                              <option value='11"'>11&quot;</option>
+                              <option value='12"'>12&quot;</option>
                             </CustomSelect>
                           </div>
                           <div>
