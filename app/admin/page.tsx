@@ -140,8 +140,8 @@ export default function AdminPage() {
 
   async function fetchSubCategories(catId?: string) {
     try {
-      const data = await listProducts(catId)
-      setSubCategories(data)
+      const response = await listProducts(catId)
+      setSubCategories(response.data)
     } catch {
       setError("Failed to load sub-categories")
     }
@@ -149,8 +149,8 @@ export default function AdminPage() {
 
   async function fetchVariants(productId: string) {
     try {
-      const data = await listSubProducts(productId)
-      setVariants(data)
+      const response = await listSubProducts(productId)
+      setVariants(response.data)
     } catch {
       setError("Failed to load products")
     }

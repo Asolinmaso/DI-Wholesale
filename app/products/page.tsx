@@ -60,8 +60,8 @@ export default function ProductsPage() {
     setProductTypesError("")
     setProductTypesLoading(true)
     try {
-      const prods = await listProducts(category._id)
-      setProductTypes(prods)
+      const prodsResponse = await listProducts(category._id)
+      setProductTypes(prodsResponse.data)
     } catch (e: unknown) {
       setProductTypesError(e instanceof Error ? e.message : "Failed to load product types")
     } finally {

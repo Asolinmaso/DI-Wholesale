@@ -49,14 +49,14 @@ export default function SubProductDetailPage() {
         const cat = cats.find((c) => c._id === prod.categoryId)
         if (cat) setCategory(cat)
 
-        const subs = await listSubProducts(productId)
-        const sub = subs.find((s) => s._id === subProductId)
+        const subsResponse = await listSubProducts(productId)
+        const sub = subsResponse.data.find((s) => s._id === subProductId)
         if (sub) {
           setSubProduct(sub)
           setQuantity(sub.minimumQuantity && sub.minimumQuantity > 0 ? sub.minimumQuantity : 10)
         }
 
-        setSuggested(subs.filter((s) => s._id !== subProductId).slice(0, 6))
+        setSuggested(subsResponse.data.filter((s) => s._id !== subProductId).slice(0, 6))
       } catch (err) {
         console.error("Failed to load", err)
       } finally {
