@@ -23,8 +23,9 @@ export interface CartItem {
 }
 
 const DB_NAME = "DI_WHOLESALE_DB"
-const DB_VERSION = 1
+const DB_VERSION = 2 // Incremented to add saved_products store
 const STORE_NAME = "cart"
+const SAVED_STORE_NAME = "saved_products"
 
 // Initialize IndexedDB
 function openDB(): Promise<IDBDatabase> {
@@ -40,6 +41,11 @@ function openDB(): Promise<IDBDatabase> {
         const store = db.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: false })
         store.createIndex("productId", "productId", { unique: false })
         store.createIndex("subProductId", "subProductId", { unique: false })
+      }
+      if (!db.objectStoreNames.contains(SAVED_STORE_NAME)) {
+        const savedStore = db.createObjectStore(SAVED_STORE_NAME, { keyPath: "id", autoIncrement: false })
+        savedStore.createIndex("productId", "productId", { unique: false })
+        savedStore.createIndex("subProductId", "subProductId", { unique: true })
       }
     }
   })
@@ -187,5 +193,137 @@ export async function getCartItemCount(): Promise<number> {
  */
 export async function getCartTotal(): Promise<number> {
   return 0
+}
+
+// Saved/Bookmarked Products
+export interface SavedProduct {
+  id: string // Unique ID for saved item (generated)
+  productId: string // Product (Sub-Category) ID
+  subProductId: string // SubProduct (variant) ID
+  name: string
+  image: string
+}
+
+// Initialize IndexedDB for saved products
+function openSavedDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION)
+
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve(request.result)
+
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result
+      if (!db.objectStoreNames.contains(SAVED_STORE_NAME)) {
+        const store = db.createObjectStore(SAVED_STORE_NAME, { keyPath: "id", autoIncrement: false })
+        store.createIndex("productId", "productId", { unique: false })
+        store.createIndex("subProductId", "subProductId", { unique: true })
+      }
+    }
+  })
+}
+
+// Generate unique ID for saved item
+function generateSavedItemId(): string {
+  return `saved_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+}
+
+/**
+ * Save/bookmark a product
+ */
+export async function saveProduct(item: Omit<SavedProduct, "id">): Promise<SavedProduct> {
+  const db = await openSavedDB()
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([SAVED_STORE_NAME], "readwrite")
+    const store = transaction.objectStore(SAVED_STORE_NAME)
+    
+    // Check if already saved
+    const index = store.index("subProductId")
+    const request = index.get(item.subProductId)
+    
+    request.onsuccess = () => {
+      const existing = request.result as SavedProduct | undefined
+      
+      if (existing) {
+        // Already saved, return existing
+        resolve(existing)
+      } else {
+        // Add new saved item
+        const newItem: SavedProduct = {
+          ...item,
+          id: generateSavedItemId(),
+        }
+        const addRequest = store.add(newItem)
+        addRequest.onsuccess = () => resolve(newItem)
+        addRequest.onerror = () => reject(addRequest.error)
+      }
+    }
+    
+    request.onerror = () => reject(request.error)
+  })
+}
+
+/**
+ * Remove saved product
+ */
+export async function unsaveProduct(subProductId: string): Promise<void> {
+  const db = await openSavedDB()
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([SAVED_STORE_NAME], "readwrite")
+    const store = transaction.objectStore(SAVED_STORE_NAME)
+    const index = store.index("subProductId")
+    const request = index.get(subProductId)
+    
+    request.onsuccess = () => {
+      const item = request.result as SavedProduct | undefined
+      if (item) {
+        const deleteRequest = store.delete(item.id)
+        deleteRequest.onsuccess = () => resolve()
+        deleteRequest.onerror = () => reject(deleteRequest.error)
+      } else {
+        resolve() // Already not saved
+      }
+    }
+    
+    request.onerror = () => reject(request.error)
+  })
+}
+
+/**
+ * Check if product is saved
+ */
+export async function isProductSaved(subProductId: string): Promise<boolean> {
+  const db = await openSavedDB()
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([SAVED_STORE_NAME], "readonly")
+    const store = transaction.objectStore(SAVED_STORE_NAME)
+    const index = store.index("subProductId")
+    const request = index.get(subProductId)
+    
+    request.onsuccess = () => {
+      resolve(!!request.result)
+    }
+    
+    request.onerror = () => reject(request.error)
+  })
+}
+
+/**
+ * Get all saved products
+ */
+export async function getSavedProducts(): Promise<SavedProduct[]> {
+  const db = await openSavedDB()
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([SAVED_STORE_NAME], "readonly")
+    const store = transaction.objectStore(SAVED_STORE_NAME)
+    const request = store.getAll()
+    
+    request.onsuccess = () => resolve(request.result as SavedProduct[])
+    request.onerror = () => reject(request.error)
+  })
 }
 

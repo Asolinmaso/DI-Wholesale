@@ -10,6 +10,7 @@ import { Footer } from "@/components/footer"
 import { ProductToolbar } from "@/components/product-toolbar"
 import { getProduct, listSubProducts, listCategories, mediaUrl, Product, SubProduct, Category, PaginatedResponse } from "@/lib/api"
 import { useCart } from "@/lib/cart-context"
+import { saveProduct, unsaveProduct, isProductSaved, SavedProduct } from "@/lib/indexeddb"
 
 export default function SubProductsListPage() {
   const params = useParams()
@@ -40,6 +41,7 @@ export default function SubProductsListPage() {
     therapeuticCategory: [] as string[],
     dosageForm: [] as string[]
   })
+  const [savedProducts, setSavedProducts] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     async function load() {
@@ -55,6 +57,15 @@ export default function SubProductsListPage() {
         const response = await listSubProducts(productId, page, perPage)
         setSubProductsResponse(response)
         setSubProducts(response.data)
+
+        // Load saved products
+        const saved = await Promise.all(
+          response.data.map(async (sub) => {
+            const saved = await isProductSaved(sub._id)
+            return saved ? sub._id : null
+          })
+        )
+        setSavedProducts(new Set(saved.filter(Boolean) as string[]))
       } catch (err) {
         console.error("Failed to load", err)
       } finally {
@@ -63,6 +74,30 @@ export default function SubProductsListPage() {
     }
     load()
   }, [slug, productId, page, perPage])
+
+  const handleToggleSave = async (subProduct: SubProduct) => {
+    try {
+      const isSaved = await isProductSaved(subProduct._id)
+      if (isSaved) {
+        await unsaveProduct(subProduct._id)
+        setSavedProducts(prev => {
+          const next = new Set(prev)
+          next.delete(subProduct._id)
+          return next
+        })
+      } else {
+        await saveProduct({
+          productId: product?._id || "",
+          subProductId: subProduct._id,
+          name: subProduct.name,
+          image: subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : (category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine") ? "/Medicine_image.png" : "/Logo2.png")
+        })
+        setSavedProducts(prev => new Set([...prev, subProduct._id]))
+      }
+    } catch (error) {
+      console.error("Failed to toggle save:", error)
+    }
+  }
 
   // Search only filters the current page results (server-side search can be added later)
   const displayProducts = search.trim()
@@ -164,14 +199,17 @@ export default function SubProductsListPage() {
               >
                 <div className="relative w-full h-[260px] bg-gray-50">
                   <Image
-                    src={subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : "/Logo2.png"}
+                    src={subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : (category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine") ? "/Medicine_image.png" : "/Logo2.png")}
                     alt={subProduct.name}
                     fill
                     className="object-contain p-6"
                     unoptimized
                   />
-                  <button className="absolute top-4 right-4 text-gray-400 hover:text-[#7B00E0]">
-                    <svg width="22" height="33" viewBox="0 0 27 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <button 
+                    onClick={() => handleToggleSave(subProduct)}
+                    className={`absolute top-4 right-4 ${savedProducts.has(subProduct._id) ? "text-[#7B00E0]" : "text-gray-400"} hover:text-[#7B00E0] transition-colors`}
+                  >
+                    <svg width="22" height="33" viewBox="0 0 27 40" fill={savedProducts.has(subProduct._id) ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg">
                       <path d="M7.2002 2H19.7998C21.0932 2 21.942 2.00201 22.5908 2.05566C23.2148 2.10729 23.4753 2.19683 23.626 2.27441C24.0943 2.51594 24.4797 2.90335 24.7227 3.38574C24.8035 3.54642 24.8938 3.81945 24.9453 4.45703C24.9986 5.1173 25 5.97939 25 7.28711V37.2275L14.6191 30.2227C13.9854 29.795 13.1675 29.7685 12.5107 30.1426L12.3818 30.2227L2 37.2256V7.28711C2 5.97939 2.00139 5.1173 2.05469 4.45703C2.10616 3.81945 2.19648 3.54642 2.27734 3.38574C2.52027 2.90345 2.90482 2.51497 3.37305 2.27344C3.52364 2.19581 3.78469 2.10733 4.40918 2.05566C5.05802 2.00201 5.9068 2 7.2002 2Z" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </button>
@@ -360,7 +398,7 @@ export default function SubProductsListPage() {
                   +
                 </button>
               </div>
-              <p className="text-gray-500 mt-3">Note : Minimum Quantity Should be 10 pcs</p>
+              <p className="text-gray-500 mt-3">Note : Minimum Purchase Quantity is 10 pcs</p>
             </div>
 
             {/* Add to Cart Button */}

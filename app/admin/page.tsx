@@ -258,7 +258,8 @@ export default function AdminPage() {
       form.append("name", variantName)
       form.append("productSize", variantSize || "")
       form.append("productShape", variantShape || "")
-      form.append("minimumQuantity", variantMinQty || "0")
+      form.append("minimumQuantity", "10") // Always 10 for users
+      form.append("stockCount", variantMinQty || "0") // Stocks field
       form.append("material", variantMaterial || "")
       form.append("description", variantDesc || "")
       form.append("composition", variantComposition || "")
@@ -315,7 +316,7 @@ export default function AdminPage() {
     setVariantName(v.name)
     setVariantImages(null)
     setVariantSize(v.productSize || "")
-    setVariantMinQty(String(v.minimumQuantity || ""))
+    setVariantMinQty(String(v.stockCount || ""))
     setVariantDesc(v.description || "")
     setVariantShape(v.productShape || "")
     setVariantMaterial(v.material || "")
@@ -695,15 +696,15 @@ export default function AdminPage() {
                       </div>
                     )
                   })()}
-                  {/* Minimum Quantity - shown for all categories */}
+                  {/* Stocks - shown for all categories */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Quantity :</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stocks :</label>
                     <input
                       type="number"
                       value={variantMinQty}
                       onChange={(e) => setVariantMinQty(e.target.value)}
                       className="w-full border rounded-lg px-3 py-2"
-                      placeholder="Enter Minimum Quantity"
+                      placeholder="Enter Stocks"
                       min={0}
                     />
                   </div>
@@ -719,25 +720,33 @@ export default function AdminPage() {
                         <>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Product Size :</label>
-                            <input
-                              type="text"
+                            <CustomSelect
                               value={variantSize}
                               onChange={(e) => setVariantSize(e.target.value)}
-                              className="w-full border rounded-lg px-3 py-2"
-                              placeholder="Enter Available Sizes (e.g., 5&quot;, 6&quot;, 7&quot;, 8&quot;)"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">Separate multiple sizes with commas</p>
+                            >
+                              <option value="">Select Size</option>
+                              <option value="5&quot;">5"</option>
+                              <option value="6&quot;">6"</option>
+                              <option value="7&quot;">7"</option>
+                              <option value="8&quot;">8"</option>
+                              <option value="9&quot;">9"</option>
+                              <option value="10&quot;">10"</option>
+                              <option value="11&quot;">11"</option>
+                              <option value="12&quot;">12"</option>
+                            </CustomSelect>
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Product Shape :</label>
-                            <input
-                              type="text"
+                            <CustomSelect
                               value={variantShape}
                               onChange={(e) => setVariantShape(e.target.value)}
-                              className="w-full border rounded-lg px-3 py-2"
-                              placeholder="Enter Available Shapes (e.g., Straight, Curved, Teeth)"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">Separate multiple shapes with commas</p>
+                            >
+                              <option value="">Select Shape</option>
+                              <option value="Straight">Straight</option>
+                              <option value="Curved">Curved</option>
+                              <option value="Teeth">Teeth</option>
+                              <option value="Plain">Plain</option>
+                            </CustomSelect>
                           </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Material :</label>
@@ -843,7 +852,7 @@ export default function AdminPage() {
                           />
                         ) : (
                           <Image
-                            src="/Logo2.png"
+                            src="/Medicine_image.png"
                             alt={v.name}
                             width={64}
                             height={64}

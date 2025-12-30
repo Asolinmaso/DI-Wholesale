@@ -28,6 +28,7 @@ export type SubProduct = {
   productSize?: string
   productShape?: string
   minimumQuantity?: number
+  stockCount?: number
   material?: string
   description?: string
   composition?: string
@@ -46,7 +47,9 @@ export function apiUrl(path: string) {
 export function mediaUrl(path: string | undefined) {
   if (!path) return ""
   if (path.startsWith("http://") || path.startsWith("https://")) return path
-  return apiUrl(path)
+  // For Next.js, images in public folder should be served directly
+  // Don't route through backend API for local images
+  return path
 }
 
 async function fetchJson<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {

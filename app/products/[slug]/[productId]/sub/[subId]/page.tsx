@@ -10,6 +10,7 @@ import { Footer } from "@/components/footer"
 import { ProductToolbar } from "@/components/product-toolbar"
 import { getProduct, listSubProducts, listCategories, mediaUrl, Product, SubProduct, Category } from "@/lib/api"
 import { useCart } from "@/lib/cart-context"
+import { saveProduct, unsaveProduct, isProductSaved } from "@/lib/indexeddb"
 
 export default function SubProductDetailPage() {
   const params = useParams()
@@ -24,12 +25,13 @@ export default function SubProductDetailPage() {
   const [subProduct, setSubProduct] = useState<SubProduct | null>(null)
   const [suggested, setSuggested] = useState<SubProduct[]>([])
   const [loading, setLoading] = useState(true)
+  const [isSaved, setIsSaved] = useState(false)
 
   // Modal states
   const [showSizeModal, setShowSizeModal] = useState(false)
   const [selectedSize, setSelectedSize] = useState("")
   const [selectedShape, setSelectedShape] = useState("")
-  const [quantity, setQuantity] = useState(subProduct?.minimumQuantity || 10)
+  const [quantity, setQuantity] = useState(10) // Always 10 for users
   const [showFilterModal, setShowFilterModal] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState({
     size: [] as string[],
@@ -53,7 +55,11 @@ export default function SubProductDetailPage() {
         const sub = subsResponse.data.find((s) => s._id === subProductId)
         if (sub) {
           setSubProduct(sub)
-          setQuantity(sub.minimumQuantity && sub.minimumQuantity > 0 ? sub.minimumQuantity : 10)
+          setQuantity(10) // Always 10 for users
+          
+          // Check if saved
+          const saved = await isProductSaved(sub._id)
+          setIsSaved(saved)
         }
 
         setSuggested(subsResponse.data.filter((s) => s._id !== subProductId).slice(0, 6))
@@ -67,6 +73,26 @@ export default function SubProductDetailPage() {
   }, [productId, subProductId])
 
   const { addToCart } = useCart()
+
+  const handleToggleSave = async () => {
+    if (!subProduct || !product) return
+    try {
+      if (isSaved) {
+        await unsaveProduct(subProduct._id)
+        setIsSaved(false)
+      } else {
+        await saveProduct({
+          productId: product._id,
+          subProductId: subProduct._id,
+          name: subProduct.name,
+          image: subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : (category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine") ? "/Medicine_image.png" : "/Logo2.png")
+        })
+        setIsSaved(true)
+      }
+    } catch (error) {
+      console.error("Failed to toggle save:", error)
+    }
+  }
 
   const handleAddToCart = async () => {
     if (!product || !subProduct) return
@@ -119,8 +145,8 @@ export default function SubProductDetailPage() {
     ? subProduct.productShape.split(',').map(s => s.trim()).filter(Boolean)
     : ["Straight", "Curved", "Teeth", "Plain"]
   
-  // Use minimumQuantity from product or default to 10
-  const minQuantity = subProduct?.minimumQuantity && subProduct.minimumQuantity > 0 ? subProduct.minimumQuantity : 10
+  // Always use 10 as minimum quantity for users
+  const minQuantity = 10
 
   if (loading) {
     return (
@@ -174,6 +200,7 @@ export default function SubProductDetailPage() {
           </div>
           <ProductToolbar 
             onFilterClick={() => setShowFilterModal(true)}
+            onBookmarkClick={handleToggleSave}
             cartCount={cartCount}
           />
         </div>
@@ -186,7 +213,7 @@ export default function SubProductDetailPage() {
           <div className="bg-gray-50 rounded-2xl p-8 flex flex-col items-center justify-center gap-4">
             <div className="relative w-full h-[350px]">
               <Image
-                src={subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : "/Logo2.png"}
+                src={subProduct.images?.[0] ? mediaUrl(subProduct.images[0]) : (category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine") ? "/Medicine_image.png" : "/Logo2.png")}
                 alt={subProduct.name}
                 fill
                 className="object-contain"
@@ -307,10 +334,10 @@ export default function SubProductDetailPage() {
                       <td className="px-5 py-3 font-medium">{subProduct.productShape}</td>
                     </tr>
                   )}
-                  {subProduct.minimumQuantity && subProduct.minimumQuantity > 0 && (
+                  {subProduct.stockCount && subProduct.stockCount > 0 && (
                     <tr>
-                      <td className="px-5 py-3 text-gray-600">Minimum Quantity</td>
-                      <td className="px-5 py-3 font-medium">{subProduct.minimumQuantity} pieces</td>
+                      <td className="px-5 py-3 text-gray-600">Stocks</td>
+                      <td className="px-5 py-3 font-medium">{subProduct.stockCount} pieces</td>
                     </tr>
                   )}
                 </tbody>
@@ -333,13 +360,33 @@ export default function SubProductDetailPage() {
               >
                 <div className="relative w-full h-[200px] bg-gray-50">
                   <Image
-                    src={prod.images?.[0] ? mediaUrl(prod.images[0]) : "/our_products/Surgical_Instruments.jpg"}
+                    src={prod.images?.[0] ? mediaUrl(prod.images[0]) : (category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine") ? "/Medicine_image.png" : "/our_products/Surgical_Instruments.jpg")}
                     alt={prod.name}
                     fill
                     className="object-contain p-6"
                     unoptimized
                   />
-                  <button className="absolute top-3 right-3 text-gray-400 hover:text-[#7B00E0]">
+                  <button 
+                    onClick={async () => {
+                      if (!prod || !product) return
+                      try {
+                        const saved = await isProductSaved(prod._id)
+                        if (saved) {
+                          await unsaveProduct(prod._id)
+                        } else {
+                          await saveProduct({
+                            productId: product._id,
+                            subProductId: prod._id,
+                            name: prod.name,
+                            image: prod.images?.[0] ? mediaUrl(prod.images[0]) : (category?.name?.toLowerCase().includes("medicine") || category?.slug?.toLowerCase().includes("medicine") ? "/Medicine_image.png" : "/our_products/Surgical_Instruments.jpg")
+                          })
+                        }
+                      } catch (error) {
+                        console.error("Failed to toggle save:", error)
+                      }
+                    }}
+                    className="absolute top-3 right-3 text-gray-400 hover:text-[#7B00E0]"
+                  >
                     <svg width="20" height="30" viewBox="0 0 27 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7.2002 2H19.7998C21.0932 2 21.942 2.00201 22.5908 2.05566C23.2148 2.10729 23.4753 2.19683 23.626 2.27441C24.0943 2.51594 24.4797 2.90335 24.7227 3.38574C24.8035 3.54642 24.8938 3.81945 24.9453 4.45703C24.9986 5.1173 25 5.97939 25 7.28711V37.2275L14.6191 30.2227C13.9854 29.795 13.1675 29.7685 12.5107 30.1426L12.3818 30.2227L2 37.2256V7.28711C2 5.97939 2.00139 5.1173 2.05469 4.45703C2.10616 3.81945 2.19648 3.54642 2.27734 3.38574C2.52027 2.90345 2.90482 2.51497 3.37305 2.27344C3.52364 2.19581 3.78469 2.10733 4.40918 2.05566C5.05802 2.00201 5.9068 2 7.2002 2Z" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -412,7 +459,7 @@ export default function SubProductDetailPage() {
                           +
                         </button>
                       </div>
-                      <p className="text-gray-500 mt-3">Note : Minimum Quantity Should be {minQuantity} Strips/Bottles</p>
+                      <p className="text-gray-500 mt-3">Note : Minimum Purchase Quantity is 10 Strips/Bottles</p>
                     </div>
 
                     <div className="flex justify-end mt-8">
@@ -512,7 +559,7 @@ export default function SubProductDetailPage() {
                         +
                       </button>
                     </div>
-                    <p className="text-gray-500 mt-3">Note : Minimum Quantity Should be {minQuantity} pcs</p>
+                    <p className="text-gray-500 mt-3">Note : Minimum Purchase Quantity is 10 pcs</p>
                   </div>
 
                   <div className="flex justify-end mt-8">
