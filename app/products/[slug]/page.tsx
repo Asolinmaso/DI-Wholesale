@@ -33,10 +33,6 @@ export default function CategoryProductsPage() {
   useEffect(() => {
     async function load() {
       setLoading(true)
-      // Clear previous data while loading new page
-      setProducts([])
-      setProductsResponse(null)
-      
       try {
         const cats = await listCategories()
         const cat = cats.find((c) => c.slug === slug)
@@ -55,17 +51,8 @@ export default function CategoryProductsPage() {
     load()
   }, [slug, page, perPage])
 
-  // Scroll to top when page changes
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [page])
-
-  // Filter products on frontend for search (only search within current page)
-  // If no search, show all products from current page
-  const filtered = search.trim()
-    ? products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
-    : products
-
+  // Use backend pagination - display products directly from API
+  const displayProducts = products
   const totalPages = productsResponse?.pagination.totalPages || 0
   const currentPage = productsResponse?.pagination.currentPage || 1
   const hasNextPage = productsResponse?.pagination.hasNextPage || false
@@ -116,11 +103,11 @@ export default function CategoryProductsPage() {
       <section className="container mx-auto px-4 pb-8">
         {loading ? (
           <div className="text-center py-12 text-gray-500">Loading products...</div>
-        ) : filtered.length === 0 ? (
+        ) : displayProducts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">No products found</div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            {filtered.map((product) => (
+            {displayProducts.map((product) => (
               <div
                 key={product._id}
                 className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 group"

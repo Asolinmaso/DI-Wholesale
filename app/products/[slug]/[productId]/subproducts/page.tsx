@@ -44,10 +44,6 @@ export default function SubProductsPage() {
   useEffect(() => {
     async function load() {
       setLoading(true)
-      // Clear previous data while loading new page
-      setSubProducts([])
-      setSubProductsResponse(null)
-      
       try {
         const cats = await listCategories()
         const cat = cats.find((c) => c.slug === slug)
@@ -56,6 +52,7 @@ export default function SubProductsPage() {
         const prod = await getProduct(productId)
         setProduct(prod)
 
+        // Always fetch paginated data from backend
         const response = await listSubProducts(productId, page, perPage)
         setSubProductsResponse(response)
         setSubProducts(response.data)
@@ -68,25 +65,12 @@ export default function SubProductsPage() {
     load()
   }, [slug, productId, page, perPage])
 
-  // Filter sub-products on frontend for search (only search within current page)
-  // If no search, show all products from current page
-  const filtered = search.trim()
-    ? subProducts.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
-    : subProducts
-
+  // Use backend pagination info - display products directly from API
+  const displayProducts = subProducts
   const totalPages = subProductsResponse?.pagination.totalPages || 0
   const currentPage = subProductsResponse?.pagination.currentPage || 1
   const hasNextPage = subProductsResponse?.pagination.hasNextPage || false
   const hasPrevPage = subProductsResponse?.pagination.hasPrevPage || false
-
-  // Scroll to top when page changes
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [page])
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage)
-  }
 
   const handleAddToCart = (sub: SubProduct) => {
     setSelectedSubProduct(sub)
@@ -153,11 +137,11 @@ export default function SubProductsPage() {
       <section className="container mx-auto px-4 pb-8">
         {loading ? (
           <div className="text-center py-12 text-gray-500">Loading products...</div>
-        ) : filtered.length === 0 ? (
+        ) : displayProducts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">No sub-products found</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {filtered.map((subProduct) => (
+            {displayProducts.map((subProduct) => (
               <div
                 key={subProduct._id}
                 className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100"
@@ -300,6 +284,8 @@ export default function SubProductsPage() {
             Showing page {currentPage} of {totalPages} ({subProductsResponse.pagination.totalProducts} total sub-products)
           </div>
         )}
+
+        
       </section>
 
       {/* Add to Cart Modal */}
