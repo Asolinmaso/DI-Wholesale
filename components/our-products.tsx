@@ -113,18 +113,12 @@ export function OurProducts() {
         )}
 
         {/* Explore All Products Button */}
-        <div className="flex justify-center mt-8 md:mt-12">
+        <div className="flex justify-center mt-6 sm:mt-8 md:mt-12">
           <Link
             href="/products"
-            className="inline-flex items-center justify-center gap-3 bg-[#7B00E0] text-white font-medium text-lg px-4 py-3 rounded-lg hover:bg-[#6A00C7] transition-colors"
+            className="inline-flex items-center justify-center gap-2 sm:gap-3 bg-[#7B00E0] text-white font-medium text-base sm:text-lg md:text-xl lg:text-2xl px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 rounded-lg hover:bg-[#6A00C7] transition-colors"
             style={{
               fontFamily: 'Poppins, sans-serif',
-              fontSize: '24px',
-              lineHeight: '36px',
-              padding: '12px 18px',
-              gap: '12px',
-              width: '272px',
-              height: '60px',
               borderRadius: '8px'
             }}
           >

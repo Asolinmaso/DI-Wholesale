@@ -80,9 +80,85 @@ export default function ProductsPage() {
     <main className="min-h-screen bg-white">
       <Navbar />
 
-      {/* Banner */}
+      {/* Mobile Header - Visible only on mobile */}
+      <section 
+        className="md:hidden relative mt-16 bg-cover bg-center px-4 pt-4 pb-6"
+        style={{ backgroundImage: "url('/Product_Banner.png')" }}
+      >
+        <div className="relative">
+          {/* Title */}
+          <h1
+            className="text-2xl font-semibold mb-2 leading-tight text-[#1E1E1E]"
+            style={{ 
+              fontFamily: 'var(--font-poppins), Poppins, sans-serif',
+              fontWeight: 600,
+            }}
+          >
+            Medical Product <span className="text-[#7B00E0]">Categories</span>
+          </h1>
+
+          {/* Description */}
+          <p
+            className="text-sm font-normal leading-5 text-[#454242] mb-4"
+            style={{ 
+              fontFamily: 'var(--font-poppins), Poppins, sans-serif',
+              fontWeight: 400,
+            }}
+          >
+            Browse our certified medical supplies by category. Designed for bulk and institutional procurement.
+          </p>
+
+          {/* Navigation Links */}
+          <div
+            className="flex flex-wrap items-center gap-2 mb-4"
+            style={{ 
+              fontFamily: 'var(--font-poppins), Poppins, sans-serif',
+            }}
+          >
+            <span className="text-sm font-medium leading-5 text-[#7B00E0]" style={{ fontWeight: 500 }}>
+              Explore products
+            </span>
+            <svg width="16" height="16" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0.000234604 9H18.3752L10.5002 1.125L11.4902 0L21.2402 9.75L11.4902 19.5L10.5002 18.375L18.3752 10.5H0.000234604V9Z" fill="#848383"/>
+            </svg>
+            <span className="text-sm font-normal leading-5 text-[#848383]" style={{ fontWeight: 400 }}>
+              Add to cart
+            </span>
+            <svg width="16" height="16" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0.000234604 9H18.3752L10.5002 1.125L11.4902 0L21.2402 9.75L11.4902 19.5L10.5002 18.375L18.3752 10.5H0.000234604V9Z" fill="#848383"/>
+            </svg>
+            <span className="text-sm font-normal leading-5 text-[#848383]" style={{ fontWeight: 400 }}>
+              All details & inquiries
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile Search & Filters - Visible only on mobile */}
+      <section className="md:hidden border-t border-b border-gray-300 px-4 py-4">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search Product Categories"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg pl-3 pr-10 py-2.5 text-sm focus:outline-none focus:border-[#7B00E0]"
+            />
+            <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#7B00E0] text-white p-1.5 rounded">
+              <Search size={16} />
+            </button>
+          </div>
+          <ProductToolbar 
+            onFilterClick={() => setShowFilterModal(true)}
+            cartCount={cartCount}
+          />
+        </div>
+      </section>
+
+      {/* Desktop Banner - Hidden on mobile */}
       <section
-        className="relative mt-20 pb-32 bg-cover bg-center"
+        className="hidden md:block relative mt-20 pb-32 bg-cover bg-center"
         style={{ backgroundImage: "url('/Product_Banner.png')" }}
       >
         <div className="absolute" />
@@ -147,8 +223,8 @@ export default function ProductsPage() {
         </div>
       </section>
 
-      {/* Search & Filters */}
-      <section className="container mx-auto px-4 py-6 border-t border-b border-gray-300">
+      {/* Desktop Search & Filters - Hidden on mobile */}
+      <section className="hidden md:block container mx-auto px-4 py-6 border-t border-b border-gray-300">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <input
@@ -170,36 +246,41 @@ export default function ProductsPage() {
       </section>
 
       {/* Categories Grid */}
-      <section className="container mx-auto px-4 pb-16">
+      <section className="container mx-auto px-4 pb-16 pt-4 md:pt-0">
         {loading ? (
           <div className="text-center py-12 text-gray-500">Loading categories...</div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12 text-gray-500">No categories found</div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {filtered.map((category) => (
               <button
                 key={category._id}
                 type="button"
                 onClick={() => openCategoryModal(category)}
-                className="text-left p-3 bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer group border border-gray-100"
+                className="text-left bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer group border border-gray-100 relative"
               >
-                <div className="relative h-[260px] md:h-[320px] bg-gray-100 rounded-t-2xl overflow-hidden m-3 mr-3">
+                <div className="relative h-[200px] md:h-[260px] lg:h-[320px] bg-gray-100 rounded-t-2xl overflow-hidden">
                   <Image
                     src={mediaUrl(category.images?.[0] || category.image)}
                     alt={category.name}
                     fill
-                    className="object-cover rounded-xl"
+                    className="object-cover"
                     unoptimized
                   />
                 </div>
-                <div className="p-4 flex items-center justify-between">
-                  <h3 className="text-sm md:text-base font-semibold text-gray-800">
+                <div className="p-4 flex items-center justify-between relative">
+                  <h3 className="text-base md:text-base font-semibold text-gray-800 pr-12 md:pr-2" style={{ fontFamily: 'var(--font-poppins), Poppins, sans-serif' }}>
                     {category.name}
                   </h3>
-                  <div className="w-9 h-9 rounded-full bg-[#7B00E0] flex items-center justify-center transition-transform group-hover:scale-110">
+                  {/* Desktop: Arrow next to title */}
+                  <div className="hidden md:flex w-9 h-9 rounded-full bg-[#7B00E0] items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110">
                     <ArrowUpRight className="w-5 h-5 text-white" />
                   </div>
+                </div>
+                {/* Mobile: Purple arrow icon at bottom right corner */}
+                <div className="absolute bottom-3 right-3 md:hidden w-9 h-9 rounded-full bg-[#7B00E0] flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110 shadow-md">
+                  <ArrowRight className="w-5 h-5 text-white" />
                 </div>
               </button>
             ))}

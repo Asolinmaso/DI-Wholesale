@@ -10,29 +10,29 @@ interface ProductToolbarProps {
 
 export function ProductToolbar({ onFilterClick, onBookmarkClick, cartCount = 0 }: ProductToolbarProps) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 md:gap-3">
       <button 
         onClick={onBookmarkClick}
-        className="p-2 hover:bg-gray-100 rounded-lg"
+        className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg"
       >
-        <svg width="30" height="30" viewBox="0 0 27 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg className="w-5 h-5 md:w-[30px] md:h-[30px]" viewBox="0 0 27 40" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M7.2002 2H19.7998C21.0932 2 21.942 2.00201 22.5908 2.05566C23.2148 2.10729 23.4753 2.19683 23.626 2.27441C24.0943 2.51594 24.4797 2.90335 24.7227 3.38574C24.8035 3.54642 24.8938 3.81945 24.9453 4.45703C24.9986 5.1173 25 5.97939 25 7.28711V37.2275L14.6191 30.2227C13.9854 29.795 13.1675 29.7685 12.5107 30.1426L12.3818 30.2227L2 37.2256V7.28711C2 5.97939 2.00139 5.1173 2.05469 4.45703C2.10616 3.81945 2.19648 3.54642 2.27734 3.38574C2.52027 2.90345 2.90482 2.51497 3.37305 2.27344C3.52364 2.19581 3.78469 2.10733 4.40918 2.05566C5.05802 2.00201 5.9068 2 7.2002 2Z" stroke="#1E1E1E" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </button>
       <button 
         onClick={onFilterClick}
-        className="p-2 hover:bg-gray-100 rounded-lg"
+        className="p-1.5 md:p-2 hover:bg-gray-100 rounded-lg"
       >
-        <svg width="30" height="30" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg className="w-5 h-5 md:w-[30px] md:h-[30px]" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M24.7491 37.506C24.8391 38.1726 24.6141 38.8836 24.0967 39.3502C23.8885 39.5562 23.6413 39.7196 23.3692 39.8311C23.097 39.9426 22.8053 40 22.5106 40C22.216 40 21.9242 39.9426 21.6521 39.8311C21.3799 39.7196 21.1327 39.5562 20.9246 39.3502L11.9033 30.4403C11.6581 30.2033 11.4717 29.9136 11.3585 29.5937C11.2453 29.2738 11.2085 28.9324 11.2509 28.5961V17.2199L0.474926 3.59951C0.109595 3.13631 -0.0552491 2.54912 0.0164127 1.96624C0.0880746 1.38337 0.390417 0.85221 0.857374 0.488823C1.28481 0.177754 1.75725 0 2.25218 0H33.7478C34.2427 0 34.7152 0.177754 35.1426 0.488823C35.6096 0.85221 35.9119 1.38337 35.9836 1.96624C36.0552 2.54912 35.8904 3.13631 35.5251 3.59951L24.7491 17.2199V37.506ZM6.84154 4.44384L15.7503 15.6868V27.9518L20.2497 32.3956V15.6645L29.1585 4.44384H6.84154Z" fill="#1E1E1E"/>
         </svg>
       </button>
-      <Link href="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg">
-        <svg width="30" height="30" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <Link href="/cart" className="relative p-1.5 md:p-2 hover:bg-gray-100 rounded-lg">
+        <svg className="w-5 h-5 md:w-[30px] md:h-[30px]" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M32 32C33.0609 32 34.0783 32.4214 34.8284 33.1716C35.5786 33.9217 36 34.9391 36 36C36 37.0609 35.5786 38.0783 34.8284 38.8284C34.0783 39.5786 33.0609 40 32 40C30.9391 40 29.9217 39.5786 29.1716 38.8284C28.4214 38.0783 28 37.0609 28 36C28 33.78 29.78 32 32 32ZM0 0H6.54L8.42 4H38C38.5304 4 39.0391 4.21071 39.4142 4.58579C39.7893 4.96086 40 5.46957 40 6C40 6.34 39.9 6.68 39.76 7L32.6 19.94C31.92 21.16 30.6 22 29.1 22H14.2L12.4 25.26L12.34 25.5C12.34 25.6326 12.3927 25.7598 12.4864 25.8536C12.5802 25.9473 12.7074 26 12.84 26H36V30H12C10.9391 30 9.92172 29.5786 9.17157 28.8284C8.42143 28.0783 8 27.0609 8 26C8 25.3 8.18 24.64 8.48 24.08L11.2 19.18L4 4H0V0ZM12 32C13.0609 32 14.0783 32.4214 14.8284 33.1716C15.5786 33.9217 16 34.9391 16 36C16 37.0609 15.5786 38.0783 14.8284 38.8284C14.0783 39.5786 13.0609 40 12 40C10.9391 40 9.92172 39.5786 9.17157 38.8284C8.42143 38.0783 8 37.0609 8 36C8 33.78 9.78 32 12 32ZM30 18L35.56 8H10.28L15 18H30Z" fill="#1E1E1E"/>
         </svg>
         {cartCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-[#7B00E0] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 md:-top-1 md:-right-1 bg-[#7B00E0] text-white text-[10px] md:text-xs w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center">
             {cartCount > 99 ? "99+" : cartCount}
           </span>
         )}

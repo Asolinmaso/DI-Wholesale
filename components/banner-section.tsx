@@ -21,7 +21,7 @@ export function BannerSection() {
 
   return (
     <section 
-      className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] lg:h-[750px] xl:h-[750px] overflow-visible mt-20"
+      className="relative w-full min-h-[400px] h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[750px] overflow-visible mt-16 md:mt-20"
       style={{
         background: "linear-gradient(270deg, rgba(255, 255, 255, 0.1) 15%, #7B00E0 81%), url(/Banner_Section.png)",
         backgroundSize: "cover",
@@ -30,14 +30,14 @@ export function BannerSection() {
       }}
     >
       {/* Content */}
-      <div className="relative z-20 container mx-auto h-full flex pt-8 md:pt-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl w-full mt-16">
+      <div className="relative z-20 container mx-auto h-full flex items-center pt-8 md:pt-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl w-full mt-8 md:mt-16">
           <h1 
-            className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-bold text-white mb-4 sm:mb-6 transition-all duration-700 ${
+            className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3 sm:mb-4 md:mb-6 transition-all duration-700 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
             style={{ 
-              lineHeight: '5.1rem',
+              lineHeight: '1.2',
               transitionDelay: '0.1s'
             }}
           >
@@ -45,7 +45,7 @@ export function BannerSection() {
           </h1>
 
           <p 
-            className={`text-sm sm:text-base md:text-lg lg:text-xl text-white mb-6 sm:mb-8 leading-relaxed transition-all duration-700 ${
+            className={`text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-white mb-4 sm:mb-6 md:mb-8 leading-relaxed transition-all duration-700 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
             style={{ transitionDelay: '0.3s' }}
